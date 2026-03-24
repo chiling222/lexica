@@ -367,16 +367,29 @@ function pasteImport(){
   let words;
   try{words=JSON.parse(raw.replace(/```json|```/g,'').trim());if(!Array.isArray(words))words=[words];}
   catch{showAlert('paste-alert','err','格式錯誤，請確認是正確的 JSON');return;}
-  let added=0,skipped=0;
+  let added=0,updated=0,skipped=0;
   words.forEach(w=>{
     if(!w.en||!w.sentence)return;
-    if(db.find(x=>x.en===w.en.toLowerCase())){skipped++;return;}
+    const existing=db.find(x=>x.en===w.en.toLowerCase());
+    if(existing){
+      // already exists — only patch missing fields, keep all progress
+      let changed=false;
+      if(w.sentenceZh&&!existing.sentenceZh){existing.sentenceZh=w.sentenceZh;changed=true;}
+      if(w.phonetic&&!existing.phonetic){existing.phonetic=w.phonetic;changed=true;}
+      if(w.zh&&!existing.zh){existing.zh=w.zh;changed=true;}
+      if(changed)updated++; else skipped++;
+      return;
+    }
     db.push({id:Date.now()+Math.random(),en:w.en.toLowerCase(),phonetic:w.phonetic||'',zh:w.zh||'',sentence:w.sentence,sentenceZh:w.sentenceZh||'',status:'new',nextReview:Date.now(),wrongCount:0,hintCount:0,seenCount:0,lastSeen:null});
     added++;
   });
   sv();updHdr();
-  if(added>0){showAlert('paste-alert','ok','✓ 匯入 '+added+' 個'+(skipped?'，'+skipped+' 個已存在':'')+'！');document.getElementById('paste-area').value='';}
-  else showAlert('paste-alert','err',skipped?'單字已全部存在':'沒有可匯入的單字');
+  const msg=[];
+  if(added>0)msg.push('新增 '+added+' 個');
+  if(updated>0)msg.push('更新 '+updated+' 個翻譯');
+  if(skipped>0)msg.push(skipped+' 個無變動');
+  if(msg.length>0){showAlert('paste-alert','ok','✓ '+msg.join('・'));document.getElementById('paste-area').value='';}
+  else showAlert('paste-alert','err','沒有可匯入的單字');
 }
 
 /* ══ MANUAL ADD ══ */
