@@ -369,17 +369,20 @@ function pasteImport(){
   catch{showAlert('paste-alert','err','格式錯誤，請確認是正確的 JSON');return;}
   let added=0,updated=0,skipped=0;
   words.forEach(w=>{
-    if(!w.en||!w.sentence)return;
+    if(!w.en)return;
     const existing=db.find(x=>x.en===w.en.toLowerCase());
     if(existing){
-      // already exists — only patch missing fields, keep all progress
+      // already exists — patch any missing/new fields, keep all progress
       let changed=false;
       if(w.sentenceZh&&!existing.sentenceZh){existing.sentenceZh=w.sentenceZh;changed=true;}
       if(w.phonetic&&!existing.phonetic){existing.phonetic=w.phonetic;changed=true;}
       if(w.zh&&!existing.zh){existing.zh=w.zh;changed=true;}
+      if(w.sentence&&!existing.sentence){existing.sentence=w.sentence;changed=true;}
       if(changed)updated++; else skipped++;
       return;
     }
+    // new word — must have sentence
+    if(!w.sentence)return;
     db.push({id:Date.now()+Math.random(),en:w.en.toLowerCase(),phonetic:w.phonetic||'',zh:w.zh||'',sentence:w.sentence,sentenceZh:w.sentenceZh||'',status:'new',nextReview:Date.now(),wrongCount:0,hintCount:0,seenCount:0,lastSeen:null});
     added++;
   });
