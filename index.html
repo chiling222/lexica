@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Lexica">
+<meta name="theme-color" content="#f5f0e8">
+<title>Lexica · 單字複習</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,400&family=Syne+Mono&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#1a1612;--paper:#f5f0e8;--cream:#ede7d9;--warm:#d4c9b0;
+  --sepia:#8b7355;--rust:#c4622d;--forest:#3d6b4f;--sky:#3a6b8a;--gold:#b8941f;
+  --green-bg:#e8f2ec;--red-bg:#f8ede8;--blue-bg:#eef3f8;
+  --r:12px;--r-sm:8px;--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--paper);color:var(--ink);font-family:'Noto Sans TC',sans-serif;display:flex;flex-direction:column;}
+
+/* ── TOP BAR ── */
+.topbar{background:var(--paper);padding:14px 18px 10px;border-bottom:1.5px solid var(--ink);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.logo{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:600;line-height:1;color:var(--ink)}
+.logo em{color:var(--rust);font-style:italic}
+.due-badge{font-family:'Syne Mono',monospace;font-size:.7rem;background:var(--rust);color:#fff;padding:3px 10px;border-radius:99px;display:none;}
+.due-badge.show{display:inline-block}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{background:#fff;border-top:1px solid var(--warm);display:flex;flex-shrink:0;padding-bottom:var(--safe-bottom);}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;background:none;border:none;cursor:pointer;font-family:'Noto Sans TC',sans-serif;font-size:.65rem;color:var(--sepia);gap:3px;transition:color .15s;}
+.bnav-btn .icon{font-size:1.3rem;line-height:1}
+.bnav-btn.on{color:var(--rust)}
+
+/* ── PAGES ── */
+.pages{flex:1;overflow:hidden;position:relative}
+.pg{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none;padding:16px 16px 32px;}
+.pg.on{display:block}
+
+/* ── CARDS ── */
+.card{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:0 1px 8px rgba(26,22,18,.07)}
+.card-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--cream)}
+
+/* ── FORM ── */
+.field{margin-bottom:12px}
+.fl{display:block;font-size:.68rem;color:var(--sepia);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;font-weight:500}
+.fl em{text-transform:none;letter-spacing:0;font-style:normal;color:var(--forest)}
+input[type=text],textarea,select{width:100%;background:var(--paper);border:1.5px solid var(--warm);border-radius:var(--r-sm);font-family:'Noto Sans TC',sans-serif;font-size:1rem;color:var(--ink);padding:11px 13px;outline:none;-webkit-appearance:none;transition:border-color .2s;}
+input[type=text]:focus,textarea:focus{border-color:var(--sepia)}
+textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.7}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:13px 20px;border:none;border-radius:var(--r-sm);font-family:'Noto Sans TC',sans-serif;font-size:.95rem;cursor:pointer;font-weight:500;transition:all .15s;-webkit-appearance:none;width:100%;}
+.btn+.btn{margin-top:8px}
+.btn-ink{background:var(--ink);color:var(--paper)}.btn-ink:active{opacity:.85}
+.btn-rust{background:var(--rust);color:#fff}.btn-rust:active{opacity:.85}
+.btn-green{background:var(--forest);color:#fff}.btn-green:active{opacity:.85}
+.btn-gold{background:var(--gold);color:#fff}.btn-gold:active{opacity:.85}
+.btn-sky{background:var(--sky);color:#fff}.btn-sky:active{opacity:.85}
+.btn-out{background:transparent;border:1.5px solid var(--warm);color:var(--sepia)}.btn-out:active{background:var(--cream)}
+.btn-sm{padding:9px 16px;font-size:.85rem;width:auto}
+.btn-row{display:flex;gap:8px}.btn-row .btn{flex:1;margin:0}
+
+/* ── SPEAK ── */
+.speak-btn{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;border:1.5px solid rgba(58,107,138,.3);background:var(--blue-bg);color:var(--sky);cursor:pointer;font-size:15px;flex-shrink:0;transition:all .15s;}
+.speak-btn:active{background:var(--sky);color:#fff}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.speak-btn.speaking{background:var(--sky);color:#fff;animation:pulse .5s ease infinite}
+
+/* ── FLASHCARD ── */
+.fc-wrap{perspective:1200px;margin-bottom:16px}
+.fc-inner{position:relative;width:100%;min-height:320px;transform-style:preserve-3d;transition:transform .5s ease;cursor:pointer;}
+.fc-inner.flipped{transform:rotateY(180deg)}
+.fc-front,.fc-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--r);padding:28px 22px;display:flex;flex-direction:column;box-shadow:0 2px 16px rgba(26,22,18,.1);}
+.fc-front{background:#fff;border:1px solid var(--warm);align-items:center;justify-content:center;text-align:center;}
+.fc-back{background:linear-gradient(135deg,#fff,#faf7f2);border:1px solid var(--warm);transform:rotateY(180deg);}
+.fc-tag{font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--sepia);letter-spacing:.2em;text-transform:uppercase;margin-bottom:20px}
+.fc-en{font-family:'Cormorant Garamond',serif;font-size:2.4rem;font-weight:600;color:var(--ink);margin-bottom:8px;line-height:1.2}
+.fc-phonetic{font-family:'Syne Mono',monospace;font-size:.9rem;color:var(--sky);margin-bottom:16px}
+.fc-pos{font-family:'Syne Mono',monospace;font-size:.65rem;color:var(--sepia);background:var(--cream);padding:2px 10px;border-radius:99px}
+.fc-hint{font-size:.78rem;color:var(--sepia);margin-top:auto;padding-top:16px;font-style:italic}
+.fc-back-zh{font-size:1.5rem;font-weight:500;color:var(--ink);margin-bottom:12px}
+.fc-back-phonetic{font-family:'Syne Mono',monospace;font-size:.82rem;color:var(--sky);margin-bottom:16px}
+.fc-back-sent{font-family:'Cormorant Garamond',serif;font-size:1.05rem;line-height:1.75;color:var(--sepia);padding:12px 14px;background:var(--paper);border-radius:var(--r-sm);border-left:3px solid var(--rust);margin-bottom:14px}
+.fc-back-sent strong{color:var(--rust);font-style:normal}
+.fc-meta{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.fc-seen{font-family:'Syne Mono',monospace;font-size:.68rem;color:var(--sepia);background:var(--cream);padding:3px 10px;border-radius:99px}
+
+/* flip hint animation */
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.flip-hint{animation:bounce 1.2s ease infinite;display:inline-block}
+
+/* ── FLASHCARD ACTIONS ── */
+.fc-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.btn-again{background:var(--red-bg);color:var(--rust);border:1.5px solid rgba(196,98,45,.25);font-size:.85rem;padding:14px 6px;line-height:1.4;border-radius:var(--r-sm)}
+.btn-again:active{background:#f0d8d2}
+.btn-fuzzy{background:#fef9ec;color:var(--gold);border:1.5px solid rgba(184,148,31,.25);font-size:.85rem;padding:14px 6px;line-height:1.4;border-radius:var(--r-sm)}
+.btn-fuzzy:active{background:#faefc8}
+.btn-knew{background:var(--green-bg);color:var(--forest);border:1.5px solid rgba(61,107,79,.25);font-size:.85rem;padding:14px 6px;line-height:1.4;border-radius:var(--r-sm)}
+.btn-knew:active{background:#cde5d4}
+.fc-round-badge{font-family:'Syne Mono',monospace;font-size:.68rem;color:var(--sepia);background:var(--cream);padding:3px 10px;border-radius:99px;display:inline-block;margin-bottom:10px}
+.fc-prog{display:flex;align-items:center;gap:10px;font-family:'Syne Mono',monospace;font-size:.72rem;color:var(--sepia);margin-bottom:14px}
+.pbar{flex:1;height:3px;background:var(--cream);border-radius:99px;overflow:hidden}
+.pfill{height:100%;background:linear-gradient(90deg,var(--sky),var(--forest));border-radius:99px;transition:width .4s}
+
+/* ── QUIZ (fill-blank) ── */
+.quiz-card{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:22px 18px;box-shadow:0 1px 8px rgba(26,22,18,.07);position:relative;overflow:hidden}
+.quiz-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--rust)}
+.rtag{font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--sepia);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;padding-left:4px}
+.rc-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.rc-phonetic{font-family:'Syne Mono',monospace;font-size:.85rem;color:var(--sky)}
+.sent-area{font-family:'Cormorant Garamond',serif;font-size:1.35rem;line-height:1.9;color:var(--ink);margin-bottom:6px;word-break:break-word}
+.meaning{font-size:.8rem;color:var(--sepia);margin-bottom:18px;font-style:italic}
+.blank-input{border:none;border-bottom:2.5px solid var(--rust);background:rgba(196,98,45,.06);border-radius:2px 2px 0 0;font-family:'Syne Mono',monospace;font-size:1.1rem;color:var(--rust);padding:2px 8px;outline:none;width:140px;text-align:center;letter-spacing:.08em;transition:all .2s;vertical-align:baseline;-webkit-appearance:none;}
+.blank-input:focus{background:rgba(196,98,45,.1)}
+.blank-input.ok{border-bottom-color:var(--forest);background:rgba(61,107,79,.08);color:var(--forest)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.blank-input.bad{animation:shake .3s ease}
+.hint-box{font-family:'Syne Mono',monospace;font-size:1.1rem;letter-spacing:.25em;color:var(--sky);margin:10px 0;padding:10px 14px;background:var(--blue-bg);border-radius:var(--r-sm);border:1px dashed rgba(58,107,138,.3)}
+.fb{padding:11px 14px;border-radius:var(--r-sm);font-size:.88rem;display:flex;align-items:center;gap:7px;margin:10px 0}
+.fb-ok{background:var(--green-bg);color:var(--forest);border:1px solid rgba(61,107,79,.2)}
+.fb-bad{background:var(--red-bg);color:var(--rust);border:1px solid rgba(196,98,45,.2)}
+.fb-hint{background:var(--blue-bg);color:var(--sky);border:1px solid rgba(58,107,138,.2)}
+.acts{display:flex;flex-direction:column;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--cream)}
+.acts-row{display:flex;gap:8px}.acts-row .btn{flex:1;margin:0}
+
+/* ── WORD LIST ── */
+.word-item{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(26,22,18,.06);}
+.wi-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.wi-en{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;flex:1}
+.wi-phonetic{font-family:'Syne Mono',monospace;font-size:.78rem;color:var(--sky);margin-bottom:3px}
+.wi-zh{font-size:.82rem;color:var(--sepia);margin-bottom:6px}
+.wi-sent{font-size:.78rem;color:var(--sepia);font-style:italic;line-height:1.5}
+.wi-bottom{display:flex;align-items:center;gap:6px;margin-top:10px;padding-top:8px;border-top:1px solid var(--cream);flex-wrap:wrap}
+.badge{font-family:'Syne Mono',monospace;font-size:.62rem;padding:2px 9px;border-radius:99px;display:inline-block}
+.b-new{background:#fef3e2;color:#8b5e0a;border:1px solid #e8c87a}
+.b-learning{background:var(--blue-bg);color:var(--sky);border:1px solid rgba(58,107,138,.25)}
+.b-known{background:var(--green-bg);color:var(--forest);border:1px solid rgba(61,107,79,.25)}
+.seen-badge{font-family:'Syne Mono',monospace;font-size:.62rem;padding:2px 9px;border-radius:99px;background:var(--cream);color:var(--sepia);border:1px solid var(--warm)}
+.del-btn{margin-left:auto;font-size:.75rem;color:var(--rust);background:none;border:none;cursor:pointer;padding:4px 8px;font-family:'Noto Sans TC',sans-serif}
+
+/* ── STATS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
+.stat-box{background:#fff;border:1px solid var(--warm);border-radius:var(--r-sm);padding:12px 14px;text-align:center;box-shadow:0 1px 6px rgba(26,22,18,.06)}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;line-height:1}
+.stat-lbl{font-size:.65rem;color:var(--sepia);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+
+/* ── EMPTY / DONE ── */
+.empty-state{text-align:center;padding:48px 20px;color:var(--sepia)}
+.empty-state .big{font-family:'Cormorant Garamond',serif;font-size:3.5rem;opacity:.2;display:block;margin-bottom:12px}
+.empty-state p{font-size:.9rem;line-height:1.7}
+.next-t{font-family:'Syne Mono',monospace;font-size:.7rem;color:var(--sepia);background:var(--cream);padding:3px 10px;border-radius:99px;display:inline-block;margin-top:8px}
+.done-card{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:36px 20px;text-align:center;box-shadow:0 1px 8px rgba(26,22,18,.07)}
+.done-card .big{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--forest);display:block;margin-bottom:8px}
+
+/* ── BACKUP ── */
+.backup-card{background:var(--blue-bg);border:1px solid rgba(58,107,138,.2);border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
+.backup-title{font-size:.9rem;font-weight:500;color:var(--sky);margin-bottom:10px}
+.backup-desc{font-size:.8rem;color:var(--sepia);line-height:1.7;margin-bottom:12px}
+
+/* ── ALERT ── */
+.alert{padding:11px 14px;border-radius:var(--r-sm);font-size:.85rem;margin-bottom:12px;display:none}
+.alert.show{display:block}
+.alert-ok{background:var(--green-bg);color:var(--forest);border:1px solid rgba(61,107,79,.2)}
+.alert-err{background:var(--red-bg);color:var(--rust);border:1px solid rgba(196,98,45,.2)}
+
+/* ── VOICE PICKER ── */
+.voice-card{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
+.voice-title{font-size:.9rem;font-weight:500;color:var(--ink);margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Lexi<em>ca</em></div>
+  <span class="due-badge" id="due-badge">0 待複習</span>
+</div>
+
+<div class="pages">
+
+  <!-- ══ ADD ══ -->
+  <div class="pg on" id="pg-add">
+    <div class="card">
+      <div class="card-title">✦ 新增單字</div>
+      <div style="display:flex;background:var(--cream);border-radius:var(--r-sm);padding:3px;margin-bottom:16px;gap:3px">
+        <button id="tab-claude" onclick="switchAddTab('claude')" style="flex:1;padding:9px;border:none;border-radius:6px;font-family:'Noto Sans TC',sans-serif;font-size:.82rem;cursor:pointer;font-weight:500;background:var(--ink);color:var(--paper);transition:all .2s">🤖 Claude 查詢</button>
+        <button id="tab-manual" onclick="switchAddTab('manual')" style="flex:1;padding:9px;border:none;border-radius:6px;font-family:'Noto Sans TC',sans-serif;font-size:.82rem;cursor:pointer;font-weight:500;background:transparent;color:var(--sepia);transition:all .2s">✏️ 手動輸入</button>
+      </div>
+      <div id="panel-claude">
+        <div style="background:var(--blue-bg);border-radius:var(--r-sm);padding:14px;margin-bottom:14px;font-size:.83rem;color:var(--sky);line-height:1.8;border:1px solid rgba(58,107,138,.2)">
+          <strong>使用方式：</strong><br>
+          1. 在 Claude.ai 說：「幫我查 單字1, 單字2」<br>
+          2. 複製 Claude 給的 JSON<br>
+          3. 貼到下方，按「匯入」
+        </div>
+        <div class="field">
+          <label class="fl">貼上 Claude 給的 JSON</label>
+          <textarea id="paste-area" rows="4" placeholder='[{"en":"stir","phonetic":"/stɜːr/","zh":"攪拌","sentence":"She __ the soup slowly.","sentenceZh":"她慢慢地攪拌湯。"}]' style="font-family:monospace;font-size:.82rem"></textarea>
+        </div>
+        <button class="btn btn-ink" onclick="pasteImport()">⬇ 匯入單字</button>
+        <div class="alert" id="paste-alert" style="margin-top:10px"></div>
+      </div>
+      <div id="panel-manual" style="display:none">
+        <div class="field"><label class="fl">英文單字 *</label><input type="text" id="f-word" placeholder="e.g. persevere" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" /></div>
+        <div class="field"><label class="fl">音標</label><input type="text" id="f-phonetic" placeholder="e.g. /pɜːrsɪˈvɪər/" /></div>
+        <div class="field"><label class="fl">中文意思</label><input type="text" id="f-zh" placeholder="e.g. 堅持、毅然" /></div>
+        <div class="field"><label class="fl">例句 <em>— 用 __ 標示填空</em></label><textarea id="f-sent" rows="3" placeholder="She __ through every hardship."></textarea></div>
+        <div class="field"><label class="fl">例句中文翻譯 <em>— 選填</em></label><input type="text" id="f-sent-zh" placeholder="e.g. 她毅然撐過每一個難關。" /></div>
+        <button class="btn btn-green" onclick="addWord()">✦ 加入單字庫</button>
+        <div class="alert" id="add-alert" style="margin-top:10px"></div>
+      </div>
+    </div>
+
+    <div class="backup-card">
+      <div class="backup-title">💾 備份 / 換裝置</div>
+      <div class="backup-desc">匯出備份檔後可在其他瀏覽器或裝置匯入。</div>
+      <div class="btn-row">
+        <button class="btn btn-sky btn-sm" onclick="exportBackup()">📤 匯出</button>
+        <label class="btn btn-out btn-sm" style="cursor:pointer">📥 匯入<input type="file" accept=".json" onchange="importBackup(this)" style="display:none" /></label>
+      </div>
+      <div class="alert" id="backup-alert" style="margin-top:10px"></div>
+    </div>
+
+    <div class="voice-card">
+      <div class="voice-title">🔊 發音設定</div>
+      <div class="field">
+        <label class="fl">選擇語音</label>
+        <select id="voice-select" onchange="saveVoice()" style="background:var(--paper);border:1.5px solid var(--warm);border-radius:var(--r-sm);font-size:.95rem;color:var(--ink);padding:10px 12px;-webkit-appearance:none"><option value="">載入中…</option></select>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-out btn-sm" style="flex:1" onclick="testVoice()">▶ 試聽</button>
+        <div style="font-size:.75rem;color:var(--sepia);flex:2;padding-left:8px;line-height:1.5">推薦選 <strong>Samantha</strong> 或 <strong>Karen</strong></div>
+      </div>
+    </div>
+
+    <div style="text-align:center;color:var(--sepia);font-size:.78rem;padding:4px 0">
+      單字庫 <strong id="tot">0</strong> 個・今日待測驗 <strong id="due-n" style="color:var(--rust)">0</strong> 個
+    </div>
+  </div>
+
+  <!-- ══ FLASHCARD ══ -->
+  <div class="pg" id="pg-flash">
+    <div class="stats-grid" id="fl-stats"></div>
+    <div id="fl-wrap"></div>
+  </div>
+
+  <!-- ══ QUIZ ══ -->
+  <div class="pg" id="pg-quiz">
+    <div class="stats-grid" id="q-stats"></div>
+    <div id="q-wrap"></div>
+  </div>
+
+  <!-- ══ LIST ══ -->
+  <div class="pg" id="pg-list">
+    <div class="stats-grid" id="l-stats" style="margin-bottom:16px"></div>
+    <div id="list-body"></div>
+  </div>
+
+</div>
+
+<nav class="bottom-nav">
+  <button class="bnav-btn on" onclick="goTab('add',this)"><span class="icon">＋</span>新增</button>
+  <button class="bnav-btn" onclick="goTab('flash',this)"><span class="icon">🃏</span>閃卡</button>
+  <button class="bnav-btn" onclick="goTab('quiz',this)"><span class="icon">✏️</span>測驗</button>
+  <button class="bnav-btn" onclick="goTab('list',this)"><span class="icon">≡</span>單字</button>
+</nav>
+
+<script>
+/* ══ DATA ══ */
+const STORE='lexica_data'; // fixed key — never change this
+const WEEK=7*24*60*60*1000;
+let db=[];
+
+// Auto-migrate from any old version keys
+(function migrate(){
+  const oldKeys=['lexica_v9','lexica_v8','lexica_v7','lexica_v6','lexica_v5','lexica_v4','lexica_v3'];
+  try{
+    // Try loading from fixed key first
+    const saved=localStorage.getItem(STORE);
+    if(saved){db=JSON.parse(saved)||[];return;}
+    // Not found — try old keys in order
+    for(const k of oldKeys){
+      const old=localStorage.getItem(k);
+      if(old){
+        const parsed=JSON.parse(old);
+        if(Array.isArray(parsed)&&parsed.length>0){
+          db=parsed;
+          localStorage.setItem(STORE,JSON.stringify(db)); // save to new key
+          localStorage.removeItem(k); // clean up old key
+          console.log('Migrated from',k,'→',STORE,'('+db.length+' words)');
+          return;
+        }
+      }
+    }
+  }catch(e){console.error('Migration error:',e);}
+})();
+
+const sv=()=>localStorage.setItem(STORE,JSON.stringify(db));
+const due=()=>db.filter(w=>w.nextReview<=Date.now());
+const fmt=ts=>new Date(ts).toLocaleDateString('zh-TW',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+
+function updHdr(){
+  const n=due().length;
+  document.getElementById('tot').textContent=db.length;
+  document.getElementById('due-n').textContent=n;
+  const b=document.getElementById('due-badge');
+  b.textContent=n+' 待測驗';b.classList.toggle('show',n>0);
+}
+
+/* ══ TABS ══ */
+function goTab(t,btn){
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('on'));
+  document.getElementById('pg-'+t).classList.add('on');
+  btn.classList.add('on');
+  if(t==='flash')initFlash();
+  if(t==='quiz')initQuiz();
+  if(t==='list')renderList();
+  updHdr();
+}
+
+/* ══ SPEECH ══ */
+let voices=[],savedVoiceName=localStorage.getItem('lexica_voice')||'';
+function loadVoices(){
+  voices=window.speechSynthesis.getVoices();
+  if(!voices.length)return;
+  const sel=document.getElementById('voice-select');
+  if(!sel)return;
+  const en=voices.filter(v=>v.lang.startsWith('en'));
+  sel.innerHTML=en.map(v=>`<option value="${v.name}" ${v.name===savedVoiceName?'selected':''}>${v.name} (${v.lang})</option>`).join('');
+  if(!savedVoiceName&&en.length){
+    const pref=['Samantha','Karen','Daniel','Alex','Moira'];
+    const best=pref.map(n=>en.find(v=>v.name===n)).find(Boolean)||en[0];
+    if(best){sel.value=best.name;savedVoiceName=best.name;localStorage.setItem('lexica_voice',best.name);}
+  }
+}
+window.speechSynthesis.onvoiceschanged=loadVoices;
+setTimeout(loadVoices,300);
+function saveVoice(){savedVoiceName=document.getElementById('voice-select').value;localStorage.setItem('lexica_voice',savedVoiceName);}
+function testVoice(){speak('Hello, this is a test.',null);}
+function getVoice(){return (savedVoiceName&&voices.find(v=>v.name===savedVoiceName))||voices.find(v=>v.lang==='en-US')||voices.find(v=>v.lang.startsWith('en'))||null;}
+function speak(text,btn){
+  if(!window.speechSynthesis)return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-US';u.rate=0.85;
+  const v=getVoice();if(v)u.voice=v;
+  if(btn){btn.classList.add('speaking');u.onend=u.onerror=()=>btn.classList.remove('speaking');}
+  window.speechSynthesis.speak(u);
+}
+
+/* ══ ADD TABS ══ */
+function switchAddTab(tab){
+  const isClaude=tab==='claude';
+  document.getElementById('panel-claude').style.display=isClaude?'block':'none';
+  document.getElementById('panel-manual').style.display=isClaude?'none':'block';
+  const c=document.getElementById('tab-claude'),m=document.getElementById('tab-manual');
+  c.style.background=isClaude?'var(--ink)':'transparent';c.style.color=isClaude?'var(--paper)':'var(--sepia)';
+  m.style.background=isClaude?'transparent':'var(--ink)';m.style.color=isClaude?'var(--sepia)':'var(--paper)';
+}
+
+/* ══ PASTE IMPORT ══ */
+function pasteImport(){
+  const raw=document.getElementById('paste-area').value.trim();
+  if(!raw){showAlert('paste-alert','err','請先貼上 JSON');return;}
+  let words;
+  try{words=JSON.parse(raw.replace(/```json|```/g,'').trim());if(!Array.isArray(words))words=[words];}
+  catch{showAlert('paste-alert','err','格式錯誤，請確認是正確的 JSON');return;}
+  let added=0,skipped=0;
+  words.forEach(w=>{
+    if(!w.en||!w.sentence)return;
+    if(db.find(x=>x.en===w.en.toLowerCase())){skipped++;return;}
+    db.push({id:Date.now()+Math.random(),en:w.en.toLowerCase(),phonetic:w.phonetic||'',zh:w.zh||'',sentence:w.sentence,sentenceZh:w.sentenceZh||'',status:'new',nextReview:Date.now(),wrongCount:0,hintCount:0,seenCount:0,lastSeen:null});
+    added++;
+  });
+  sv();updHdr();
+  if(added>0){showAlert('paste-alert','ok','✓ 匯入 '+added+' 個'+(skipped?'，'+skipped+' 個已存在':'')+'！');document.getElementById('paste-area').value='';}
+  else showAlert('paste-alert','err',skipped?'單字已全部存在':'沒有可匯入的單字');
+}
+
+/* ══ MANUAL ADD ══ */
+function addWord(){
+  const en=document.getElementById('f-word').value.trim().toLowerCase();
+  const zh=document.getElementById('f-zh').value.trim();
+  const phonetic=document.getElementById('f-phonetic').value.trim();
+  const sentence=document.getElementById('f-sent').value.trim();
+  const sentenceZh=document.getElementById('f-sent-zh')?document.getElementById('f-sent-zh').value.trim():'';
+  if(!en){showAlert('add-alert','err','請輸入英文單字');return;}
+  if(!sentence.includes('__')){showAlert('add-alert','err','例句需要 __ 作為填空位置');return;}
+  if(db.find(w=>w.en===en)&&!confirm('「'+en+'」已存在，確定再加入？'))return;
+  db.push({id:Date.now(),en,zh,phonetic,sentence,sentenceZh,status:'new',nextReview:Date.now(),wrongCount:0,hintCount:0,seenCount:0,lastSeen:null});
+  sv();
+  ['f-word','f-zh','f-phonetic','f-sent','f-sent-zh'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f-word').focus();
+  showAlert('add-alert','ok','✓「'+en+'」已加入！');
+  updHdr();
+}
+
+/* ══ BACKUP ══ */
+function exportBackup(){
+  if(!db.length){alert('單字庫是空的');return;}
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='Lexica備份_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(url);
+}
+function importBackup(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(!Array.isArray(data))throw new Error();
+      let added=0;
+      data.forEach(w=>{
+        if(!w.en)return;
+        if(db.find(x=>x.en===w.en))return;
+        db.push({seenCount:0,lastSeen:null,...w,id:w.id||Date.now()+Math.random()});
+        added++;
+      });
+      sv();updHdr();
+      showAlert('backup-alert','ok','✓ 匯入 '+added+' 個單字');
+    }catch{showAlert('backup-alert','err','檔案格式錯誤');}
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function showAlert(id,type,msg){
+  const el=document.getElementById(id);
+  el.className='alert show alert-'+(type==='ok'?'ok':'err');
+  el.textContent=msg;
+  setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+/* ══════════════════════════════
+   FLASHCARD MODE
+══════════════════════════════ */
+const BATCH=10;
+let FQ=[],fi=0,fFlipped=false,fAgainQueue=[];
+
+function initFlash(){
+  const unseen=db.filter(w=>!w.seenCount||w.seenCount===0).sort(()=>Math.random()-.5);
+  const seen=db.filter(w=>w.seenCount>0).sort(()=>Math.random()-.5);
+  const pool=[...unseen,...seen];
+  FQ=pool.slice(0,BATCH);
+  fi=0;fFlipped=false;fAgainQueue=[];
+  renderFlashStats();renderFlashCard();
+}
+
+function renderFlashStats(){
+  document.getElementById('fl-stats').innerHTML=`
+    <div class="stat-box"><div class="stat-num">${db.length}</div><div class="stat-lbl">全部</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--rust)">${db.filter(w=>!w.seenCount||w.seenCount===0).length}</div><div class="stat-lbl">未看過</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--sky)">${db.filter(w=>w.seenCount>0).length}</div><div class="stat-lbl">已看過</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--forest)">${db.filter(w=>w.status==='known').length}</div><div class="stat-lbl">已熟記</div></div>`;
+}
+
+function renderFlashCard(){
+  const wrap=document.getElementById('fl-wrap');
+  if(!db.length){
+    wrap.innerHTML=`<div class="empty-state"><span class="big">🃏</span><p>單字庫是空的</p><p style="margin-top:8px;font-size:.82rem">請先在「新增」加入單字</p></div>`;return;
+  }
+  if(fi>=FQ.length){
+    if(fAgainQueue.length>0){
+      FQ=[...fAgainQueue].sort(()=>Math.random()-.5);
+      fAgainQueue=[];fi=0;fFlipped=false;
+      renderFlashCard();return;
+    }
+    const remaining=db.filter(w=>!w.seenCount||w.seenCount===0).length;
+    wrap.innerHTML=`<div class="done-card">
+      <span class="big">本輪完成 ✓</span>
+      <p style="color:var(--sepia);font-size:.88rem;margin-bottom:4px">已看完這輪 10 張！</p>
+      ${remaining>0?`<p style="font-family:'Syne Mono',monospace;font-size:.72rem;color:var(--sepia);margin-bottom:12px">還有 ${remaining} 個未看過</p>`:''}
+      <button class="btn btn-ink" style="margin-top:8px" onclick="initFlash()">再來一輪（10張）</button>
+      <button class="btn btn-out" style="margin-top:8px" onclick="goTab('quiz',document.querySelectorAll('.bnav-btn')[2])">切換到測驗模式 ✏️</button>
+    </div>`;
+    renderFlashStats();return;
+  }
+  const w=FQ[fi];fFlipped=false;
+  const seenText=w.seenCount>0?`看過 ${w.seenCount} 次`:'第一次看';
+  const againInfo=fAgainQueue.length>0?` · ${fAgainQueue.length}張待重複`:'';
+  wrap.innerHTML=`
+    <div class="fc-prog">
+      <div class="pbar"><div class="pfill" style="width:${Math.round(fi/FQ.length*100)}%"></div></div>
+      <span>${fi+1}/${FQ.length}${againInfo}</span>
+    </div>
+    <div class="fc-wrap" onclick="flipCard()">
+      <div class="fc-inner" id="fc-inner">
+        <div class="fc-front">
+          <div class="fc-tag">${seenText}</div>
+          <div class="fc-en">${w.en}</div>
+          ${w.phonetic?`<div class="fc-phonetic">${w.phonetic}</div>`:''}
+          <button class="speak-btn" style="margin:8px auto" onclick="event.stopPropagation();speak('${w.en}',this)">🔊</button>
+          <div class="fc-hint"><span class="flip-hint">👆</span> 點卡片翻面看答案</div>
+        </div>
+        <div class="fc-back">
+          <div class="fc-meta">
+            <span class="fc-seen">${seenText}</span>
+            <button class="speak-btn" style="width:28px;height:28px;font-size:12px" onclick="speak('${w.en}',this)">🔊</button>
+          </div>
+          <div class="fc-back-zh">${w.zh||'—'}</div>
+          ${w.phonetic?`<div class="fc-back-phonetic">${w.phonetic}</div>`:''}
+          <div class="fc-back-sent">${w.sentence.replace('__',`<strong>${w.en}</strong>`)}</div>
+          ${w.sentenceZh?`<div style="font-size:.8rem;color:var(--sepia);margin:-4px 0 8px;font-style:italic;line-height:1.5">${w.sentenceZh}</div>`:''}
+          <button class="speak-btn" style="width:auto;border-radius:14px;padding:0 12px;gap:4px;font-size:.78rem;height:30px;margin-bottom:8px" onclick="speak('${w.sentence.replace('__',w.en).replace(/'/g,"\'")}',this)">🔊 例句</button>
+        </div>
+      </div>
+    </div>
+    <div id="fc-btns" style="display:none">
+      <div class="fc-actions">
+        <button class="btn btn-again" onclick="fcAnswer(0)">✗<br>完全<br>不記得</button>
+        <button class="btn btn-fuzzy" onclick="fcAnswer(1)">△<br>模糊<br>記得</button>
+        <button class="btn btn-knew" onclick="fcAnswer(2)">✓<br>清楚<br>記得</button>
+      </div>
+      <p style="text-align:center;font-size:.7rem;color:var(--sepia);margin-top:6px;line-height:1.8">
+        完全不記得 → 本輪重複出現<br>模糊記得 → 明天再複習 ・ 清楚記得 → 一週後
+      </p>
+    </div>
+    <button class="btn btn-out" onclick="fcSkip()" style="font-size:.85rem;padding:10px;margin-top:6px">跳過 →</button>`;
+  setTimeout(()=>speak(w.en),400);
+}
+
+function flipCard(){
+  if(fFlipped)return;
+  fFlipped=true;
+  document.getElementById('fc-inner').classList.add('flipped');
+  document.getElementById('fc-btns').style.display='block';
+  const w=FQ[fi];
+  const rec=db.find(x=>x.id===w.id);
+  if(rec){rec.seenCount=(rec.seenCount||0)+1;rec.lastSeen=Date.now();sv();}
+}
+
+function fcAnswer(score){
+  const w=FQ[fi];
+  const rec=db.find(x=>x.id===w.id);
+  if(rec){
+    if(score===0){
+      rec.status='learning';rec.nextReview=Date.now()+10*60000;
+      fAgainQueue.push({...FQ[fi]});
+    }else if(score===1){
+      rec.status='learning';rec.nextReview=Date.now()+24*60*60000;
+    }else{
+      rec.status='known';rec.nextReview=Date.now()+WEEK;
+    }
+    sv();
+  }
+  fi++;renderFlashCard();renderFlashStats();
+}
+
+function fcSkip(){fi++;renderFlashCard();}
+
+/* ══════════════════════════════
+   QUIZ MODE (fill-blank)
+══════════════════════════════ */
+let Q=[],qi=0,hLv=0,ansState='input';
+
+function initQuiz(){
+  Q=due().sort(()=>Math.random()-.5);qi=0;hLv=0;ansState='input';
+  renderQuizStats();renderQuizCard();
+}
+
+function renderQuizStats(){
+  document.getElementById('q-stats').innerHTML=`
+    <div class="stat-box"><div class="stat-num">${db.length}</div><div class="stat-lbl">全部</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--gold)">${db.filter(w=>w.status==='new').length}</div><div class="stat-lbl">待學習</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--sky)">${db.filter(w=>w.status==='learning').length}</div><div class="stat-lbl">學習中</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--forest)">${db.filter(w=>w.status==='known').length}</div><div class="stat-lbl">已熟記</div></div>`;
+}
+
+function renderQuizCard(){
+  const wrap=document.getElementById('q-wrap');
+  if(!Q.length){
+    const nx=db.filter(w=>w.nextReview>Date.now()).sort((a,b)=>a.nextReview-b.nextReview)[0];
+    wrap.innerHTML=`<div class="empty-state"><span class="big">✏️</span>
+      <p>目前沒有待測驗的單字</p>
+      ${nx?`<span class="next-t">下次：${fmt(nx.nextReview)}</span>`:'<p style="margin-top:8px;font-size:.82rem">先用閃卡模式瀏覽單字吧！</p>'}
+    </div>`;return;
+  }
+  if(qi>=Q.length){
+    wrap.innerHTML=`<div class="done-card">
+      <span class="big">測驗完成 ✓</span>
+      <p style="color:var(--sepia);font-size:.88rem">已測驗 ${Q.length} 個單字，辛苦了！</p>
+      <button class="btn btn-ink" style="margin-top:16px" onclick="initQuiz()">再測一輪</button>
+    </div>`;
+    renderQuizStats();return;
+  }
+  const w=Q[qi];hLv=0;ansState='input';
+  const pct=Math.round(qi/Q.length*100);
+  const parts=(w.sentence+'').split('__');
+  wrap.innerHTML=`
+    <div class="fc-prog">
+      <div class="pbar"><div class="pfill" style="width:${pct}%" style="background:linear-gradient(90deg,var(--rust),var(--gold))"></div></div>
+      <span>${qi+1}/${Q.length}</span>
+    </div>
+    <div class="quiz-card">
+      <div class="rtag">${{new:'新單字',learning:'複習中',known:'週期複習'}[w.status]}</div>
+      <div class="rc-meta">
+        ${w.phonetic?`<span class="rc-phonetic">${w.phonetic}</span>`:''}
+        <button class="speak-btn" onclick="speak('${w.en}',this)">🔊</button>
+        <button class="speak-btn" style="font-size:11px;width:auto;border-radius:14px;padding:0 10px;gap:3px;height:30px" onclick="speak('${w.sentence.replace('__',w.en).replace(/'/g,"\\'")}',this)">🔊 例句</button>
+      </div>
+      <div class="sent-area">${parts[0]||''}<input id="blank" class="blank-input" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="?" />${parts[1]||''}</div>
+      ${w.zh?`<div class="meaning">中文：${w.zh}</div>`:''}
+      ${w.sentenceZh?`<div class="meaning" style="margin-top:-14px">例句：${w.sentenceZh}</div>`:''}
+      <div id="hint-box" style="display:none" class="hint-box"></div>
+      <div id="fb-area"></div>
+      <div class="acts" id="acts">
+        <button class="btn btn-ink" onclick="checkAns()">確認答案</button>
+        <div class="acts-row">
+          <button class="btn btn-out" onclick="doHint()">💡 提示</button>
+          <button class="btn btn-out" onclick="qNxt()">跳過</button>
+        </div>
+      </div>
+    </div>`;
+  const inp=document.getElementById('blank');
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&ansState==='input')checkAns();});
+  inp.focus();
+}
+
+function checkAns(){
+  if(ansState!=='input')return;
+  const inp=document.getElementById('blank');
+  const val=inp.value.trim().toLowerCase();
+  const w=Q[qi];
+  if(val===w.en.toLowerCase()){
+    ansState='correct';inp.classList.add('ok');inp.disabled=true;inp.value=w.en;
+    setFb('ok','✓ 答對了！');
+    updW(w.id,{status:'known',nextReview:Date.now()+WEEK});
+    document.getElementById('acts').innerHTML=`<button class="btn btn-green" onclick="qNxt()">下一個 →</button>
+      <p style="text-align:center;font-size:.75rem;color:var(--sepia);margin-top:4px">下次複習：${fmt(Date.now()+WEEK)}</p>`;
+  }else{
+    inp.classList.add('bad');setTimeout(()=>inp.classList.remove('bad'),350);
+    updW(w.id,{status:'learning',nextReview:Date.now()+15*60000,wrongCount:(w.wrongCount||0)+1});
+    setFb('bad','✗ 不對喔，再想想…');
+    setTimeout(()=>{setFb(null);inp.value='';inp.focus();},1200);
+  }
+}
+
+function doHint(){
+  if(ansState==='correct')return;
+  const w=Q[qi];hLv=Math.min(hLv+1,3);
+  updW(w.id,{status:'learning',nextReview:Date.now()+30*60000,hintCount:(w.hintCount||0)+1});
+  const a=w.en.split('');
+  let h='';
+  if(hLv===1)h=a[0]+' '+'_ '.repeat(a.length-1).trim();
+  else if(hLv===2)h=a.map((c,i)=>(i===0||i===a.length-1)?c:'_').join(' ');
+  else h=a.map((c,i)=>i%2===0?c:'_').join(' ');
+  const hb=document.getElementById('hint-box');hb.textContent=h;hb.style.display='block';
+  if(hLv>=3){
+    ansState='hinted';
+    const inp=document.getElementById('blank');inp.value=w.en;inp.disabled=true;
+    setFb('hint','答案：'+w.en);
+    document.getElementById('acts').innerHTML=`<div class="acts-row">
+      <button class="btn btn-rust" onclick="qNxt()">下一個 →</button>
+      <button class="btn btn-green" onclick="markKn()">我記住了 ✓</button>
+    </div>`;
+  }
+}
+
+function markKn(){updW(Q[qi].id,{status:'known',nextReview:Date.now()+WEEK});qNxt();}
+function qNxt(){qi++;renderQuizCard();renderQuizStats();}
+function setFb(type,msg){
+  const el=document.getElementById('fb-area');
+  if(!type){el.innerHTML='';return;}
+  el.innerHTML=`<div class="fb fb-${type==='ok'?'ok':type==='hint'?'hint':'bad'}">${msg}</div>`;
+}
+function updW(id,patch){
+  const i=db.findIndex(w=>w.id===id);if(i>-1){Object.assign(db[i],patch);sv();}
+  const j=Q.findIndex(w=>w.id===id);if(j>-1)Object.assign(Q[j],patch);
+}
+
+/* ══ LIST ══ */
+let listFilter='all'; // all | unseen | seen | known
+
+function renderList(){
+  const unseen=db.filter(w=>!w.seenCount||w.seenCount===0).length;
+  const seen=db.filter(w=>w.seenCount>0).length;
+  const known=db.filter(w=>w.status==='known').length;
+
+  const boxStyle=(active)=>active
+    ?'cursor:pointer;border:2px solid var(--ink);transform:scale(1.03);transition:all .18s;box-shadow:0 2px 12px rgba(26,22,18,.15)'
+    :'cursor:pointer;border:1px solid var(--warm);transition:all .18s';
+
+  document.getElementById('l-stats').innerHTML=`
+    <div class="stat-box" onclick="setFilter('all')" style="${boxStyle(listFilter==='all')}">
+      <div class="stat-num">${db.length}</div>
+      <div class="stat-lbl">全部</div>
+      ${listFilter==='all'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼ 顯示中</div>':''}
+    </div>
+    <div class="stat-box" onclick="setFilter('unseen')" style="${boxStyle(listFilter==='unseen')}">
+      <div class="stat-num" style="color:var(--rust)">${unseen}</div>
+      <div class="stat-lbl">未看過</div>
+      ${listFilter==='unseen'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼ 顯示中</div>':''}
+    </div>
+    <div class="stat-box" onclick="setFilter('seen')" style="${boxStyle(listFilter==='seen')}">
+      <div class="stat-num" style="color:var(--sky)">${seen}</div>
+      <div class="stat-lbl">已看過</div>
+      ${listFilter==='seen'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼ 顯示中</div>':''}
+    </div>
+    <div class="stat-box" onclick="setFilter('known')" style="${boxStyle(listFilter==='known')}">
+      <div class="stat-num" style="color:var(--forest)">${known}</div>
+      <div class="stat-lbl">已熟記</div>
+      ${listFilter==='known'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼ 顯示中</div>':''}
+    </div>`;
+
+  const body=document.getElementById('list-body');
+  if(!db.length){
+    body.innerHTML=`<div class="empty-state"><span class="big">◌</span><p>尚未加入任何單字</p></div>`;return;
+  }
+
+  // filter
+  let filtered;
+  const filterLabel={all:'全部單字',unseen:'未看過',seen:'已看過',known:'已熟記'};
+  if(listFilter==='all') filtered=[...db];
+  else if(listFilter==='unseen') filtered=db.filter(w=>!w.seenCount||w.seenCount===0);
+  else if(listFilter==='seen') filtered=db.filter(w=>w.seenCount>0);
+  else if(listFilter==='known') filtered=db.filter(w=>w.status==='known');
+
+  // sort
+  const ord={new:0,learning:1,known:2};
+  filtered.sort((a,b)=>ord[a.status]-ord[b.status]);
+
+  if(!filtered.length){
+    body.innerHTML=`<div class="empty-state" style="padding:32px 20px">
+      <span class="big" style="font-size:2.5rem">◌</span>
+      <p style="margin-top:8px">沒有「${filterLabel[listFilter]}」的單字</p>
+    </div>`;return;
+  }
+
+  // filter label bar
+  const labelBar=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 2px">
+    <span style="font-family:'Syne Mono',monospace;font-size:.72rem;color:var(--sepia)">${filterLabel[listFilter]}・共 ${filtered.length} 個</span>
+    ${listFilter!=='all'?`<button onclick="setFilter('all')" style="font-size:.72rem;color:var(--sky);background:none;border:none;cursor:pointer;font-family:'Noto Sans TC',sans-serif">✕ 清除篩選</button>`:''}
+  </div>`;
+
+  body.innerHTML=labelBar+filtered.map(w=>`
+    <div class="word-item">
+      <div class="wi-top">
+        <span class="wi-en">${w.en}</span>
+        <button class="speak-btn" style="width:30px;height:30px;font-size:13px" onclick="speak('${w.en}',this)">🔊</button>
+      </div>
+      ${w.phonetic?`<div class="wi-phonetic">${w.phonetic}</div>`:''}
+      ${w.zh?`<div class="wi-zh">${w.zh}</div>`:''}
+      <div class="wi-sent">${w.sentence.replace('__',`<strong style="color:var(--rust);font-style:normal">[${w.en}]</strong>`)}</div>
+      ${w.sentenceZh?`<div style="font-size:.75rem;color:var(--sepia);margin-top:3px;line-height:1.5">${w.sentenceZh}</div>`:''}
+      <div class="wi-bottom">
+        <span class="badge b-${w.status}">${{new:'待學習',learning:'學習中',known:'已熟記'}[w.status]}</span>
+        <span class="seen-badge">${w.seenCount>0?'看過 '+w.seenCount+' 次':'未看過'}</span>
+        <button class="del-btn" onclick="del(${w.id})">刪除</button>
+      </div>
+    </div>`).join('');
+}
+
+function setFilter(f){
+  listFilter=f;
+  renderList();
+  // scroll list to top
+  const pg=document.getElementById('pg-list');
+  if(pg) pg.scrollTop=0;
+}
+
+function del(id){
+  if(!confirm('確定要刪除？'))return;
+  db=db.filter(w=>w.id!==id);sv();renderList();updHdr();
+}
+
+updHdr();
+</script>
+</body>
+</html>
