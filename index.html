@@ -597,25 +597,41 @@ function fcSkip(){fi++;renderFlashCard();}
 let Q=[],qi=0,hLv=0,ansState='input';
 
 function initQuiz(){
-  Q=due().sort(()=>Math.random()-.5);qi=0;hLv=0;ansState='input';
+  // only words that have been seen in flashcard AND are due
+  // status 'learning' = 模糊記得, status 'known' = 清楚記得
+  const now=Date.now();
+  Q=db.filter(w=>
+    (w.status==='learning'||w.status==='known') &&
+    w.seenCount>0 &&
+    w.nextReview<=now
+  ).sort(()=>Math.random()-.5);
+  qi=0;hLv=0;ansState='input';
   renderQuizStats();renderQuizCard();
 }
 
 function renderQuizStats(){
+  const now=Date.now();
+  const eligible=db.filter(w=>(w.status==='learning'||w.status==='known')&&w.seenCount>0);
+  const dueCnt=eligible.filter(w=>w.nextReview<=now).length;
   document.getElementById('q-stats').innerHTML=`
-    <div class="stat-box"><div class="stat-num">${db.length}</div><div class="stat-lbl">全部</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--gold)">${db.filter(w=>w.status==='new').length}</div><div class="stat-lbl">待學習</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--sky)">${db.filter(w=>w.status==='learning').length}</div><div class="stat-lbl">學習中</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--forest)">${db.filter(w=>w.status==='known').length}</div><div class="stat-lbl">已熟記</div></div>`;
+    <div class="stat-box"><div class="stat-num">${db.length}</div><div class="stat-lbl">全部單字</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--rust)">${db.filter(w=>!w.seenCount||w.seenCount===0).length}</div><div class="stat-lbl">未看閃卡</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--sky)">${eligible.length}</div><div class="stat-lbl">可測驗</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--rust)">${dueCnt}</div><div class="stat-lbl">今日待測</div></div>`;
 }
 
 function renderQuizCard(){
   const wrap=document.getElementById('q-wrap');
   if(!Q.length){
-    const nx=db.filter(w=>w.nextReview>Date.now()).sort((a,b)=>a.nextReview-b.nextReview)[0];
+    const hasUnseen=db.filter(w=>!w.seenCount||w.seenCount===0).length;
+    const hasSeen=db.filter(w=>w.seenCount>0&&(w.status==='learning'||w.status==='known')).length;
+    const nx=db.filter(w=>(w.status==='learning'||w.status==='known')&&w.nextReview>Date.now()).sort((a,b)=>a.nextReview-b.nextReview)[0];
     wrap.innerHTML=`<div class="empty-state"><span class="big">✏️</span>
       <p>目前沒有待測驗的單字</p>
-      ${nx?`<span class="next-t">下次：${fmt(nx.nextReview)}</span>`:'<p style="margin-top:8px;font-size:.82rem">先用閃卡模式瀏覽單字吧！</p>'}
+      ${hasSeen===0&&hasUnseen>0
+        ?'<p style="margin-top:8px;font-size:.82rem;color:var(--sky)">請先用「🃏 閃卡」瀏覽單字<br>看過後才能進入測驗</p>'
+        :nx?`<span class="next-t">下次測驗：${fmt(nx.nextReview)}</span>`
+        :'<p style="margin-top:8px;font-size:.82rem">請先在「新增」加入單字</p>'}
     </div>`;return;
   }
   if(qi>=Q.length){
