@@ -365,8 +365,16 @@ function pasteImport(){
   const raw=document.getElementById('paste-area').value.trim();
   if(!raw){showAlert('paste-alert','err','請先貼上 JSON');return;}
   let words;
-  try{words=JSON.parse(raw.replace(/```json|```/g,'').trim());if(!Array.isArray(words))words=[words];}
-  catch{showAlert('paste-alert','err','格式錯誤，請確認是正確的 JSON');return;}
+  try{
+    // fix curly/smart quotes that iOS copies instead of straight quotes
+    const clean=raw
+      .replace(/“|”|„|‟/g,'"')
+      .replace(/‘|’|‚|‛/g,"'")
+      .replace(/```json|```/g,'')
+      .trim();
+    words=JSON.parse(clean);
+    if(!Array.isArray(words))words=[words];
+  }catch{showAlert('paste-alert','err','格式錯誤，請確認是正確的 JSON');return;}
   let added=0,updated=0,skipped=0;
   words.forEach(w=>{
     if(!w.en)return;
