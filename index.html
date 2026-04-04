@@ -170,12 +170,7 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .voice-title{font-size:.9rem;font-weight:500;color:var(--ink);margin-bottom:10px}
 
 /* ── GARDEN ── */
-.g-cloud{position:absolute;background:white;border-radius:50px;opacity:0.9}
-.g-cloud::before,.g-cloud::after{content:'';position:absolute;background:white;border-radius:50%}
-.g-cloud:first-of-type::before{width:44px;height:44px;top:-22px;left:10px}
-.g-cloud:first-of-type::after{width:34px;height:34px;top:-16px;left:42px}
-.g-cloud:last-of-type::before{width:32px;height:32px;top:-15px;left:8px}
-.g-cloud:last-of-type::after{width:26px;height:26px;top:-11px;left:30px}
+
 @keyframes gdrift{from{transform:translateX(-200px)}to{transform:translateX(calc(100vw + 200px))}}
 @keyframes gbreathe{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes gwalkB{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1.5deg)}}
@@ -320,8 +315,31 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
       <!-- garden scene -->
       <div id="g-scene" style="flex:1;position:relative;overflow:hidden;background:linear-gradient(180deg,#87CEEB 0%,#b8e4f9 50%,#6abf5e 50%,#4e9e43 100%)">
         <div style="position:absolute;top:8%;right:10%;width:52px;height:52px;background:#ffd84d;border-radius:50%;box-shadow:0 0 0 12px rgba(255,216,77,0.18)"></div>
-        <div class="g-cloud" style="width:90px;height:30px;top:10%;left:5%;animation:gdrift 22s linear infinite"></div>
-        <div class="g-cloud" style="width:65px;height:24px;top:20%;left:58%;animation:gdrift 28s linear infinite 9s"></div>
+        <!-- cloud 1 -->
+        <div style="position:absolute;top:12%;left:5%;animation:gdrift 22s linear infinite;pointer-events:none">
+          <div style="position:relative;width:100px;height:44px">
+            <div style="position:absolute;bottom:0;left:0;width:100px;height:28px;background:white;border-radius:99px;opacity:0.88"></div>
+            <div style="position:absolute;bottom:10px;left:12px;width:44px;height:44px;background:white;border-radius:50%;opacity:0.88"></div>
+            <div style="position:absolute;bottom:10px;left:40px;width:36px;height:36px;background:white;border-radius:50%;opacity:0.88"></div>
+            <div style="position:absolute;bottom:8px;left:62px;width:28px;height:28px;background:white;border-radius:50%;opacity:0.88"></div>
+          </div>
+        </div>
+        <!-- cloud 2 -->
+        <div style="position:absolute;top:22%;left:55%;animation:gdrift 30s linear infinite 10s;pointer-events:none">
+          <div style="position:relative;width:80px;height:36px">
+            <div style="position:absolute;bottom:0;left:0;width:80px;height:22px;background:white;border-radius:99px;opacity:0.85"></div>
+            <div style="position:absolute;bottom:8px;left:8px;width:34px;height:34px;background:white;border-radius:50%;opacity:0.85"></div>
+            <div style="position:absolute;bottom:8px;left:34px;width:28px;height:28px;background:white;border-radius:50%;opacity:0.85"></div>
+          </div>
+        </div>
+        <!-- cloud 3 small -->
+        <div style="position:absolute;top:8%;left:35%;animation:gdrift 25s linear infinite 5s;pointer-events:none">
+          <div style="position:relative;width:60px;height:28px">
+            <div style="position:absolute;bottom:0;left:0;width:60px;height:18px;background:white;border-radius:99px;opacity:0.8"></div>
+            <div style="position:absolute;bottom:6px;left:10px;width:26px;height:26px;background:white;border-radius:50%;opacity:0.8"></div>
+            <div style="position:absolute;bottom:4px;left:30px;width:20px;height:20px;background:white;border-radius:50%;opacity:0.8"></div>
+          </div>
+        </div>
         <div id="g-ground" style="position:absolute;bottom:0;left:0;right:0;height:50%">
           <div id="g-decos" style="position:absolute;inset:0"></div>
           <div id="g-dog-wrap" style="position:absolute;bottom:50%;z-index:5;cursor:pointer;left:50%;transform:translateX(-50%)">
@@ -330,7 +348,7 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
             <img id="g-dog" style="height:auto;filter:drop-shadow(2px 5px 5px rgba(0,0,0,0.15));display:block" src="" alt="🐾"/>
           </div>
         </div>
-        <div style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);font-size:.75rem;color:rgba(255,255,255,0.8);pointer-events:none;font-weight:500">點狗狗互動 · 鍵盤 ← → 控制</div>
+        
       </div>
     </div>
   </div>
@@ -943,7 +961,7 @@ const G_ITEMS=[
 
 // dog state
 let gDog={x:50,fl:false,state:'idle',moveTimer:null,autoTimer:null,autoMoveTimer:null,userBusy:false};
-const G_SIZES={walk:'240px',run:'260px',sit:'180px',happy:'180px',lie:'280px'};
+const G_SIZES={walk:'200px',run:'220px',sit:'160px',happy:'160px',lie:'200px'};
 let gInited=false;
 
 function gInitDog(){
@@ -978,8 +996,8 @@ function gAutoMove(dir,speed,dur){
   clearInterval(gDog.autoMoveTimer);
   gDog.autoMoveTimer=setInterval(()=>{
     gDog.x+=dir*speed;
-    if(gDog.x<=5){gDog.x=5;gStopAuto();gScheduleNext(1000);}
-    else if(gDog.x>=95){gDog.x=95;gStopAuto();gScheduleNext(1000);}
+    if(gDog.x<=8){gDog.x=8;gStopAuto();gScheduleNext(1000);}
+    else if(gDog.x>=92){gDog.x=92;gStopAuto();gScheduleNext(1000);}
     gSetPos();
   },30);
   setTimeout(()=>gStopAuto(),dur);
@@ -1027,9 +1045,9 @@ setTimeout(()=>{
 document.addEventListener('keydown',e=>{
   if(document.getElementById('pg-garden')?.classList.contains('on')){
     gDog.userBusy=true;clearTimeout(gDog.autoTimer);clearInterval(gDog.autoMoveTimer);
-    if(e.key==='ArrowLeft'){gDog.fl=true;gSetDog('walk','walk',true);clearInterval(gDog.moveTimer);gDog.moveTimer=setInterval(()=>{gDog.x=Math.max(5,gDog.x-1.4);gSetPos();},30);}
-    else if(e.key==='ArrowRight'){gDog.fl=false;gSetDog('walk','walk',false);clearInterval(gDog.moveTimer);gDog.moveTimer=setInterval(()=>{gDog.x=Math.min(95,gDog.x+1.4);gSetPos();},30);}
-    else if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();gSetDog('run','run',gDog.fl);clearInterval(gDog.moveTimer);gDog.moveTimer=setInterval(()=>{gDog.x=Math.max(5,Math.min(95,gDog.x+(gDog.fl?-2.8:2.8)));gSetPos();},30);}
+    if(e.key==='ArrowLeft'){gDog.fl=true;gSetDog('walk','walk',true);clearInterval(gDog.moveTimer);gDog.moveTimer=setInterval(()=>{gDog.x=Math.max(8,gDog.x-1.4);gSetPos();},30);}
+    else if(e.key==='ArrowRight'){gDog.fl=false;gSetDog('walk','walk',false);clearInterval(gDog.moveTimer);gDog.moveTimer=setInterval(()=>{gDog.x=Math.min(92,gDog.x+1.4);gSetPos();},30);}
+    else if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();gSetDog('run','run',gDog.fl);clearInterval(gDog.moveTimer);gDog.moveTimer=setInterval(()=>{gDog.x=Math.max(8,Math.min(92,gDog.x+(gDog.fl?-2.8:2.8)));gSetPos();},30);}
     else if(e.key==='ArrowDown'){clearInterval(gDog.moveTimer);gSetDog('lie','lie');gBubble('😴');}
     else if(e.key==='s'||e.key==='S'){clearInterval(gDog.moveTimer);gSetDog('sit','sit');gBubble('🐾');}
     else if(e.key==='h'||e.key==='H'){clearInterval(gDog.moveTimer);gSetDog('happy','happy');gBubble('🎉 汪！');}
