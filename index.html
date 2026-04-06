@@ -896,7 +896,7 @@ function renderQuizCard(){
         <button class="speak-btn" onclick="speak('${w.en}',this)">🔊</button>
         <button class="speak-btn" style="font-size:11px;width:auto;border-radius:14px;padding:0 10px;gap:3px;height:30px" onclick="speak('${w.sentence.replace('__',w.en).replace(/'/g,"\\'")}',this)">🔊 例句</button>
       </div>
-      <div class="sent-area">${parts[0]||''}<input id="blank" class="blank-input" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="?" />${parts[1]||''}</div>
+      <div class="sent-area">${parts[0]||''}<input id="blank" class="blank-input" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="?" inputmode="text" />${parts[1]||''}</div>
       ${w.zh?`<div class="meaning">中文：${w.zh}</div>`:''}
       ${w.sentenceZh?`<div class="meaning" style="margin-top:-14px">例句：${w.sentenceZh}</div>`:''}
       <div id="hint-box" style="display:none" class="hint-box"></div>
@@ -920,7 +920,7 @@ function checkAns(){
   const inp=document.getElementById('blank');
   const val=inp.value.trim().toLowerCase();
   const w=Q[qi];
-  const normalize=s=>s.toLowerCase().trim().replace(/[-\s]+/g,'');
+  const normalize=s=>s.toLowerCase().trim().replace(/[^a-z0-9]/g,'');
   if(normalize(val)===normalize(w.en)){
     ansState='correct';
     inp.classList.add('ok');inp.disabled=true;inp.value=w.en;
@@ -941,34 +941,44 @@ function checkAns(){
   }else{
     inp.classList.add('bad');setTimeout(()=>inp.classList.remove('bad'),350);
     updW(w.id,{status:'learning',nextReview:Date.now()+DAY,wrongCount:(w.wrongCount||0)+1});
-    setFb('bad','✗ 不對喔，再想想…');
-    setTimeout(()=>{setFb(null);inp.value='';inp.focus();},1200);
+    // show what was typed vs expected to help debug
+    const typed=normalize(val), expected=normalize(w.en);
+    const msg = typed===expected ? '✗ 格式問題，請重試' : `✗ 輸入：${val}　答案：${w.en}`;
+    setFb('bad', msg);
+    setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2000);
   }
 }
 
 function doHint(){
-  if(ansState==='correct')return;
+  if(ansState==='correct'||ansState==='hinted')return;
   const w=Q[qi];hLv=Math.min(hLv+1,3);
-  updW(w.id,{status:'learning',nextReview:Date.now()+30*60000,hintCount:(w.hintCount||0)+1});
+  updW(w.id,{status:'learning',nextReview:Date.now()+DAY,hintCount:(w.hintCount||0)+1});
   const a=w.en.split('');
-  let h='';
-  if(hLv===1)h=a[0]+' '+'_ '.repeat(a.length-1).trim();
-  else if(hLv===2)h=a.map((c,i)=>(i===0||i===2)?c:'_').join(' '); // 第1個+第3個
-  else h=a.map((c,i)=>i%2===0?c:'_').join(' ');
-  const hb=document.getElementById('hint-box');hb.textContent=h;hb.style.display='block';
-  if(hLv>=3){
-    // fully revealed - disable input
+  const hb=document.getElementById('hint-box');
+  hb.style.display='block';
+
+  if(hLv===1){
+    // 第1次：只顯示第1個字母
+    hb.textContent=a[0]+' '+'_ '.repeat(a.length-1).trim();
+    ansState='hinted_partial';
+    document.getElementById('blank').focus();
+  } else if(hLv===2){
+    // 第2次：顯示第1個+第3個字母
+    hb.textContent=a.map((c,i)=>(i===0||i===2)?c:'_').join(' ');
+    ansState='hinted_partial';
+    document.getElementById('blank').focus();
+  } else {
+    // 第3次：完全顯示答案，鎖住輸入框
+    hb.textContent=a.join(' ');
     ansState='hinted';
-    const inp=document.getElementById('blank');inp.value=w.en;inp.disabled=true;
-    setFb('hint','答案：'+w.en);
+    const inp=document.getElementById('blank');
+    inp.value=w.en;
+    inp.disabled=true;
+    setFb('hint','💡 答案：'+w.en);
     document.getElementById('acts').innerHTML=`<div class="acts-row">
       <button class="btn btn-rust" onclick="qNxt()">下一個 →</button>
       <button class="btn btn-green" onclick="markKn()">我記住了 ✓</button>
     </div>`;
-  } else {
-    // partial hint - still allow typing
-    ansState='hinted_partial';
-    document.getElementById('blank').focus();
   }
 }
 
