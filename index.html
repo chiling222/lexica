@@ -237,7 +237,8 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
           <strong>使用方式：</strong><br>
           1. 在 Claude.ai 說：「幫我查 單字1, 單字2」<br>
           2. 複製 Claude 給的 JSON<br>
-          3. 貼到下方，按「匯入」
+          3. 貼到下方，按「匯入」<br>
+          <span style="color:var(--forest)">✦ JSON 支援 memory 記憶提示欄位</span>
         </div>
         <div class="field">
           <label class="fl">貼上 Claude 給的 JSON</label>
@@ -512,7 +513,7 @@ function pasteImport(){
     }
     // new word — must have sentence
     if(!w.sentence)return;
-    db.push({id:Date.now()+Math.random(),en:w.en.toLowerCase(),phonetic:w.phonetic||'',zh:w.zh||'',sentence:w.sentence,sentenceZh:w.sentenceZh||'',status:'new',nextReview:Date.now(),wrongCount:0,hintCount:0,seenCount:0,lastSeen:null});
+    db.push({id:Date.now()+Math.random(),en:w.en.toLowerCase(),phonetic:w.phonetic||'',zh:w.zh||'',sentence:w.sentence,sentenceZh:w.sentenceZh||'',memory:w.memory||'',status:'new',nextReview:Date.now(),wrongCount:0,hintCount:0,seenCount:0,lastSeen:null,knownCount:0,fuzzyCount:0});
     added++;
   });
   sv();updHdr();
@@ -534,7 +535,7 @@ function addWord(){
   if(!en){showAlert('add-alert','err','請輸入英文單字');return;}
   if(!sentence.includes('__')){showAlert('add-alert','err','例句需要 __ 作為填空位置');return;}
   if(db.find(w=>w.en===en)&&!confirm('「'+en+'」已存在，確定再加入？'))return;
-  db.push({id:Date.now(),en,zh,phonetic,sentence,sentenceZh,status:'new',nextReview:Date.now(),wrongCount:0,hintCount:0,seenCount:0,lastSeen:null});
+  db.push({id:Date.now(),en,zh,phonetic,sentence,sentenceZh,memory:'',status:'new',nextReview:Date.now(),wrongCount:0,hintCount:0,seenCount:0,lastSeen:null,knownCount:0,fuzzyCount:0});
   sv();
   ['f-word','f-zh','f-phonetic','f-sent','f-sent-zh'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('f-word').focus();
@@ -747,6 +748,7 @@ function renderFlashCard(){
           <div class="fc-back-sent">${w.sentence.replace('__',`<strong>${w.en}</strong>`)}</div>
           ${w.sentenceZh?`<div style="font-size:.8rem;color:var(--sepia);margin:-4px 0 8px;font-style:italic;line-height:1.5">${w.sentenceZh}</div>`:''}
           <button class="speak-btn" style="width:auto;border-radius:14px;padding:0 12px;gap:4px;font-size:.78rem;height:30px;margin-bottom:8px" onclick="speak('${w.sentence.replace('__',w.en).replace(/'/g,"\'")}',this)">🔊 例句</button>
+          ${w.memory?`<div style="margin-top:8px;background:#fef9ec;border:1px solid #e8d4a0;border-radius:10px;padding:8px 12px;font-size:.82rem;line-height:1.6;color:#6b4c10"><span style="font-size:.9rem">💡</span> ${w.memory}</div>`:''}
         </div>
       </div>
     </div>
@@ -1028,6 +1030,7 @@ function renderList(){
       ${w.zh?`<div class="wi-zh">${w.zh}</div>`:''}
       <div class="wi-sent">${w.sentence.replace('__',`<strong style="color:var(--rust);font-style:normal">[${w.en}]</strong>`)}</div>
       ${w.sentenceZh?`<div style="font-size:.75rem;color:var(--sepia);margin-top:3px;line-height:1.5">${w.sentenceZh}</div>`:''}
+      ${w.memory?`<div style="font-size:.75rem;color:#8a6010;margin-top:4px;line-height:1.5;background:#fef9ec;border-radius:6px;padding:4px 8px">💡 ${w.memory}</div>`:''}
       <div class="wi-bottom">
         <span class="badge b-${w.status}" style="${w.status==='graduated'?'background:#e8f4e8;color:#2d6a2d;border:1px solid #6abf5e':''}">${{new:'待學習',learning:'學習中',again:'再次學習',known:'已熟記',graduated:'已畢業 🎓'}[w.status]||w.status}</span>
         <span class="seen-badge">${w.seenCount>0?'看過 '+w.seenCount+' 次':'未看過'}</span>
