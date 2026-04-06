@@ -508,6 +508,7 @@ function pasteImport(){
       if(w.phonetic&&!existing.phonetic){existing.phonetic=w.phonetic;changed=true;}
       if(w.zh&&!existing.zh){existing.zh=w.zh;changed=true;}
       if(w.sentence&&!existing.sentence){existing.sentence=w.sentence;changed=true;}
+      if(w.memory&&(!existing.memory||existing.memory==='')){existing.memory=w.memory;changed=true;}
       if(changed)updated++; else skipped++;
       return;
     }
