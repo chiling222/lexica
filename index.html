@@ -701,7 +701,7 @@ function renderFlashCard(){
         <span class="big" style="font-size:1.8rem">這組完成 ✓</span>
         <p style="color:var(--sepia);font-size:.88rem;margin:8px 0 4px">還有 ${moreDue+moreUnseen} 個待複習</p>
         <button class="btn btn-ink" style="margin-top:12px" onclick="initFlash(false)">繼續看 ${Math.min(DAILY_LIMIT,moreDue+moreUnseen)} 個 ▶</button>
-        <button class="btn btn-out" style="margin-top:8px" onclick="fi=FQ.length+1;renderFlashCard()">今天到此為止</button>
+        <button class="btn btn-out" style="margin-top:8px" onclick="showDoneForToday()">今天到此為止</button>
       </div>`;
     } else {
       wrap.innerHTML=`<div class="done-card">
@@ -814,6 +814,20 @@ function fcAnswer(score){
 }
 
 function fcSkip(){fi++;renderFlashCard();}
+
+function showDoneForToday(){
+  clearInterval(undefined);
+  const wrap=document.getElementById('fl-wrap');
+  const challenge=getChallengeCards();
+  wrap.innerHTML=`<div class="done-card">
+    <span class="big" style="font-size:1.8rem">今天到此為止 👋</span>
+    <p style="color:var(--sepia);font-size:.88rem;margin:8px 0 16px">明天繼續加油！🐾</p>
+    ${challenge.length>0
+      ?`<button class="btn btn-sky" onclick="initFlash(true)">再次挑戰（${challenge.length}張）</button>`
+      :''}
+  </div>`;
+  renderFlashStats();
+}
 
 /* ══════════════════════════════
    QUIZ MODE (fill-blank)
