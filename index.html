@@ -939,13 +939,22 @@ function checkAns(){
     document.getElementById('acts').innerHTML=`<button class="btn btn-green" onclick="qNxt()">下一個 →</button>
       <p style="text-align:center;font-size:.75rem;color:var(--sepia);margin-top:4px">下次複習：${nextLabel}</p>`;
   }else{
-    inp.classList.add('bad');setTimeout(()=>inp.classList.remove('bad'),350);
+    inp.classList.add('bad');
+    setTimeout(()=>inp.classList.remove('bad'),350);
     updW(w.id,{status:'learning',nextReview:Date.now()+DAY,wrongCount:(w.wrongCount||0)+1});
-    // show what was typed vs expected to help debug
-    const typed=normalize(val), expected=normalize(w.en);
-    const msg = typed===expected ? '✗ 格式問題，請重試' : `✗ 輸入：${val}　答案：${w.en}`;
-    setFb('bad', msg);
-    setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2000);
+    // auto-show next hint level on wrong answer
+    setTimeout(()=>{
+      setFb(null);
+      inp.value='';
+      if(hLv<3){
+        doHint(); // auto advance hint
+        setFb('bad','✗ 不對，給你一個提示！');
+        setTimeout(()=>setFb(null),1500);
+      } else {
+        // already at max hint - just clear and let them try again or see answer
+        inp.focus();
+      }
+    },800);
   }
 }
 
