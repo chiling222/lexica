@@ -75,14 +75,14 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .fc-inner.flipped{transform:rotateY(180deg)}
 .fc-front,.fc-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--r);padding:28px 22px;display:flex;flex-direction:column;box-shadow:0 2px 16px rgba(26,22,18,.1);}
 .fc-front{background:#fff;border:1px solid var(--warm);align-items:center;justify-content:center;text-align:center;}
-.fc-back{background:linear-gradient(135deg,#fff,#faf7f2);border:1px solid var(--warm);transform:rotateY(180deg);}
+.fc-back{background:linear-gradient(135deg,#fff,#faf7f2);border:1px solid var(--warm);transform:rotateY(180deg);overflow-y:auto;}
 .fc-tag{font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--sepia);letter-spacing:.2em;text-transform:uppercase;margin-bottom:20px}
 .fc-en{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:var(--ink);margin-bottom:8px;line-height:1.3;word-break:break-word;max-width:100%}
 .fc-phonetic{font-family:'Syne Mono',monospace;font-size:.9rem;color:var(--sky);margin-bottom:16px}
 .fc-pos{font-family:'Syne Mono',monospace;font-size:.65rem;color:var(--sepia);background:var(--cream);padding:2px 10px;border-radius:99px}
 .fc-hint{font-size:.78rem;color:var(--sepia);margin-top:auto;padding-top:16px;font-style:italic}
 .fc-back-zh{font-size:1.5rem;font-weight:500;color:var(--ink);margin-bottom:12px}
-.fc-back-phonetic{font-family:'Syne Mono',monospace;font-size:.82rem;color:var(--sky);margin-bottom:16px}
+.fc-back-phonetic{font-family:'Syne Mono',monospace;font-size:.82rem;color:var(--sky);margin-bottom:0}
 .fc-back-sent{font-family:'Cormorant Garamond',serif;font-size:1.05rem;line-height:1.75;color:var(--sepia);padding:12px 14px;background:var(--paper);border-radius:var(--r-sm);border-left:3px solid var(--rust);margin-bottom:14px}
 .fc-back-sent strong{color:var(--rust);font-style:normal}
 .fc-meta{display:flex;align-items:center;gap:8px;margin-bottom:14px}
@@ -739,17 +739,17 @@ function renderFlashCard(){
           <button class="speak-btn" style="margin:8px auto" onclick="event.stopPropagation();speak('${w.en.replace(/'/g,"\'")}',this)">🔊</button>
           <div class="fc-hint"><span class="flip-hint">👆</span> 點卡片翻面看答案</div>
         </div>
-        <div class="fc-back">
+        <div class="fc-back" style="overflow-y:auto">
           <div class="fc-meta">
             <span class="fc-seen">${seenText}</span>
+            ${w.phonetic?`<span class="fc-back-phonetic" style="margin:0;font-size:.78rem">${w.phonetic}</span>`:''}
             <button class="speak-btn" style="width:28px;height:28px;font-size:12px" onclick="speak('${w.en.replace(/'/g,"\'")}',this)">🔊</button>
           </div>
           <div class="fc-back-zh">${w.zh||'—'}</div>
-          ${w.phonetic?`<div class="fc-back-phonetic">${w.phonetic}</div>`:''}
           <div class="fc-back-sent">${w.sentence.replace('__',`<strong>${w.en}</strong>`)}</div>
           ${w.sentenceZh?`<div style="font-size:.8rem;color:var(--sepia);margin:-4px 0 8px;font-style:italic;line-height:1.5">${w.sentenceZh}</div>`:''}
           <button class="speak-btn" style="width:auto;border-radius:14px;padding:0 12px;gap:4px;font-size:.78rem;height:30px;margin-bottom:8px" onclick="speak('${w.sentence.replace('__',w.en).replace(/'/g,"\'")}',this)">🔊 例句</button>
-          ${w.memory?`<div style="margin-top:8px;background:#fef9ec;border:1px solid #e8d4a0;border-radius:10px;padding:8px 12px;font-size:.82rem;line-height:1.6;color:#6b4c10"><span style="font-size:.9rem">💡</span> ${w.memory}</div>`:''}
+          ${w.memory?`<div style="background:#fef9ec;border:1px solid #e8d4a0;border-radius:10px;padding:8px 12px;font-size:.82rem;line-height:1.6;color:#6b4c10;margin-bottom:4px"><span style="font-size:.9rem">💡</span> ${w.memory}</div>`:''}
         </div>
       </div>
     </div>
