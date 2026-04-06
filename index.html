@@ -910,27 +910,37 @@ function renderQuizCard(){
       </div>
     </div>`;
   const inp=document.getElementById('blank');
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&ansState==='input')checkAns();});
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&(ansState==='input'||ansState==='hinted_partial'))checkAns();});
   inp.focus();
 }
 
 function checkAns(){
-  if(ansState!=='input')return;
+  // allow checking when input or hinted (but not after fully revealed)
+  if(ansState!=='input' && ansState!=='hinted_partial')return;
   const inp=document.getElementById('blank');
   const val=inp.value.trim().toLowerCase();
   const w=Q[qi];
-  // normalize both for comparison (handles phrases with spaces)
-  const normalize=s=>s.toLowerCase().trim().replace(/\s+/g,' ');
+  const normalize=s=>s.toLowerCase().trim().replace(/[-\s]+/g,'');
   if(normalize(val)===normalize(w.en)){
-    ansState='correct';inp.classList.add('ok');inp.disabled=true;inp.value=w.en;
+    ansState='correct';
+    inp.classList.add('ok');inp.disabled=true;inp.value=w.en;
     setFb('ok','✓ 答對了！');
-    updW(w.id,{status:'known',nextReview:Date.now()+WEEK});
+    // use spaced repetition: quiz correct = same as 清楚記得
+    const rec=db.find(x=>x.id===w.id);
+    if(rec){
+      rec.knownCount=(rec.knownCount||0)+1;
+      const next=getNextReview(rec,2);
+      if(next===null){rec.status='graduated';rec.nextReview=Date.now()+365*DAY;}
+      else{rec.status='known';rec.nextReview=next;}
+      sv();
+    }
     gEarnCoin(1);
+    const nextLabel=rec?['7天後','14天後','28天後','畢業 🎓'][Math.min((rec.knownCount||1)-1,3)]:'7天後';
     document.getElementById('acts').innerHTML=`<button class="btn btn-green" onclick="qNxt()">下一個 →</button>
-      <p style="text-align:center;font-size:.75rem;color:var(--sepia);margin-top:4px">下次複習：${fmt(Date.now()+WEEK)}</p>`;
+      <p style="text-align:center;font-size:.75rem;color:var(--sepia);margin-top:4px">下次複習：${nextLabel}</p>`;
   }else{
     inp.classList.add('bad');setTimeout(()=>inp.classList.remove('bad'),350);
-    updW(w.id,{status:'learning',nextReview:Date.now()+15*60000,wrongCount:(w.wrongCount||0)+1});
+    updW(w.id,{status:'learning',nextReview:Date.now()+DAY,wrongCount:(w.wrongCount||0)+1});
     setFb('bad','✗ 不對喔，再想想…');
     setTimeout(()=>{setFb(null);inp.value='';inp.focus();},1200);
   }
@@ -943,10 +953,11 @@ function doHint(){
   const a=w.en.split('');
   let h='';
   if(hLv===1)h=a[0]+' '+'_ '.repeat(a.length-1).trim();
-  else if(hLv===2)h=a.map((c,i)=>(i===0||i===a.length-1)?c:'_').join(' ');
+  else if(hLv===2)h=a.map((c,i)=>(i===0||i===2)?c:'_').join(' '); // 第1個+第3個
   else h=a.map((c,i)=>i%2===0?c:'_').join(' ');
   const hb=document.getElementById('hint-box');hb.textContent=h;hb.style.display='block';
   if(hLv>=3){
+    // fully revealed - disable input
     ansState='hinted';
     const inp=document.getElementById('blank');inp.value=w.en;inp.disabled=true;
     setFb('hint','答案：'+w.en);
@@ -954,10 +965,25 @@ function doHint(){
       <button class="btn btn-rust" onclick="qNxt()">下一個 →</button>
       <button class="btn btn-green" onclick="markKn()">我記住了 ✓</button>
     </div>`;
+  } else {
+    // partial hint - still allow typing
+    ansState='hinted_partial';
+    document.getElementById('blank').focus();
   }
 }
 
-function markKn(){updW(Q[qi].id,{status:'known',nextReview:Date.now()+WEEK});qNxt();}
+function markKn(){
+  const w=Q[qi];
+  const rec=db.find(x=>x.id===w.id);
+  if(rec){
+    rec.knownCount=(rec.knownCount||0)+1;
+    const next=getNextReview(rec,2);
+    if(next===null){rec.status='graduated';rec.nextReview=Date.now()+365*DAY;}
+    else{rec.status='known';rec.nextReview=next;}
+    sv();
+  }
+  qNxt();
+}
 function qNxt(){qi++;renderQuizCard();renderQuizStats();}
 function setFb(type,msg){
   const el=document.getElementById('fb-area');
