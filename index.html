@@ -420,7 +420,15 @@ function goTab(t,btn){
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('on'));
   document.getElementById('pg-'+t).classList.add('on');
   btn.classList.add('on');
-  if(t==='flash')initFlash(false);
+  if(t==='flash'){
+    // try to restore today's session first
+    if(!restoreFlashSession()){
+      initFlash(false);
+    } else {
+      renderFlashStats();
+      renderFlashCard();
+    }
+  }
   if(t==='quiz')initQuiz();
   if(t==='list')renderList();
   if(t==='garden'){setTimeout(()=>{gInitDog();gSetPos();},100);}
@@ -679,6 +687,7 @@ function renderFlashCard(){
         : `<p style="font-size:.82rem;color:var(--forest)">🎉 所有單字今天都看完了！</p>`}
     </div>`;
     // trigger dog happy in garden
+    clearFlashSession();
     try{if(typeof gSetDog==='function'){gSetDog('happy','happy');gBubble('今天全部完成！🎉');setTimeout(()=>gSetDog('idle','walk',false),3000);}}catch{}
     renderFlashStats();
     return;
@@ -809,14 +818,50 @@ function fcAnswer(score){
     try{if(score===2)gEarnCoin(1);}catch{}
   }
   fi++;
+  saveFlashSession();
   renderFlashCard();
   renderFlashStats();
 }
 
-function fcSkip(){fi++;renderFlashCard();}
+function fcSkip(){fi++;saveFlashSession();renderFlashCard();}
+
+function saveFlashSession(){
+  // save current session so user can resume
+  const session={
+    ids: FQ.map(w=>w.id),
+    fi: fi,
+    isChallenge: fIsChallenge,
+    date: new Date().toDateString()
+  };
+  localStorage.setItem('lexica_flash_session', JSON.stringify(session));
+}
+
+function restoreFlashSession(){
+  try{
+    const s=JSON.parse(localStorage.getItem('lexica_flash_session'));
+    if(!s) return false;
+    // only restore if same day
+    if(s.date !== new Date().toDateString()){
+      localStorage.removeItem('lexica_flash_session');
+      return false;
+    }
+    // rebuild FQ from saved ids
+    const restored = s.ids.map(id=>db.find(w=>w.id===id)).filter(Boolean);
+    if(!restored.length) return false;
+    FQ = restored;
+    fi = Math.min(s.fi, FQ.length);
+    fIsChallenge = s.isChallenge||false;
+    fFlipped = false;
+    return true;
+  }catch{return false;}
+}
+
+function clearFlashSession(){
+  localStorage.removeItem('lexica_flash_session');
+}
 
 function showDoneForToday(){
-  clearInterval(undefined);
+  clearFlashSession();clearInterval(undefined);
   const wrap=document.getElementById('fl-wrap');
   const challenge=getChallengeCards();
   wrap.innerHTML=`<div class="done-card">
