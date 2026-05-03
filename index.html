@@ -36,9 +36,7 @@ async function cloudLoad(){
         window._db.forEach(lw=>{if(!merged.find(r=>r.en===lw.en))merged.push(lw);});
         window._db=merged;
         localStorage.setItem(window._STORE,JSON.stringify(window._db));
-        if(window._updHdr)window._window._db=db;
-window._updHdr=updHdr;
-updHdr();
+        if(window._updHdr)window._updHdr();
         showSyncMsg('☁ 雲端資料已同步');
       }
     }
