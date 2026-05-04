@@ -380,6 +380,30 @@ function importBackup(input){
 function showAlert(id,type,msg){const el=document.getElementById(id);el.className='alert show alert-'+(type==='ok'?'ok':'err');el.textContent=msg;setTimeout(()=>el.classList.remove('show'),3000);}
 
 let FQ=[],fi=0,fFlipped=false,fBatchSeen=new Set();
+
+const TODAY=()=>new Date().toISOString().slice(0,10);
+function saveFlashProgress(){
+  localStorage.setItem('lexica_flash_progress',JSON.stringify({
+    date:TODAY(),fi,
+    fqIds:FQ.map(w=>w.id),
+    seenIds:[...fBatchSeen]
+  }));
+}
+function loadFlashProgress(){
+  try{
+    const s=localStorage.getItem('lexica_flash_progress');
+    if(!s)return false;
+    const p=JSON.parse(s);
+    if(p.date!==TODAY())return false;
+    // 重建 FQ（依照 id 找回單字）
+    const rebuilt=p.fqIds.map(id=>db.find(w=>w.id===id)).filter(Boolean);
+    if(!rebuilt.length)return false;
+    FQ=rebuilt;fi=p.fi;fBatchSeen=new Set(p.seenIds);
+    return true;
+  }catch{return false;}
+}
+function clearFlashProgress(){localStorage.removeItem('lexica_flash_progress');}
+
 function buildFlashBatch(forceExtra=false){
   const t=now();
   const forced=db.filter(w=>w.status!=='graduated'&&(w.flashWrongCount||0)>=3).sort((a,b)=>(b.flashWrongCount||0)-(a.flashWrongCount||0)).slice(0,3);
@@ -392,7 +416,18 @@ function buildFlashBatch(forceExtra=false){
   if(batch.length<BATCH&&forceExtra){const bIds=new Set(batch.map(w=>w.id));const extras=db.filter(w=>w.status!=='graduated'&&!bIds.has(w.id)).sort(()=>Math.random()-.5).slice(0,BATCH-batch.length);batch=[...batch,...extras];}
   return batch.sort(()=>Math.random()-.5);
 }
-function initFlash(forceExtra=false){FQ=buildFlashBatch(forceExtra);fi=0;fFlipped=false;fBatchSeen=new Set();renderFlashStats();renderFlashCard();}
+function initFlash(forceExtra=false){
+  if(!forceExtra&&loadFlashProgress()){
+    // 有今天的進度，繼續
+    fFlipped=false;
+    renderFlashStats();renderFlashCard();
+    return;
+  }
+  FQ=buildFlashBatch(forceExtra);
+  fi=0;fFlipped=false;fBatchSeen=new Set();
+  saveFlashProgress();
+  renderFlashStats();renderFlashCard();
+}
 function renderFlashStats(){
   document.getElementById('fl-stats').innerHTML=`
     <div class="stat-box"><div class="stat-num">${db.length}</div><div class="stat-lbl">全部</div></div>
@@ -456,7 +491,7 @@ function flipCard(){
   document.getElementById('fc-inner').classList.add('flipped');
   document.getElementById('fc-btns').style.display='block';
   const w=FQ[fi];
-  if(!fBatchSeen.has(w.id)){fBatchSeen.add(w.id);const rec=db.find(x=>x.id===w.id);if(rec){rec.seenCount=(rec.seenCount||0)+1;rec.lastSeen=now();sv();}}
+  if(!fBatchSeen.has(w.id)){fBatchSeen.add(w.id);const rec=db.find(x=>x.id===w.id);if(rec){rec.seenCount=(rec.seenCount||0)+1;rec.lastSeen=now();sv();}saveFlashProgress();}
 }
 function fcAnswer(score){
   const w=FQ[fi];const rec=db.find(x=>x.id===w.id);
@@ -466,7 +501,7 @@ function fcAnswer(score){
     else{const kc=rec.knewCount||0;if(kc>=3){rec.status='graduated';rec.nextReview=now()+365*DAY;}else{rec.nextReview=now()+KNEW_INTERVALS[kc];rec.status='known';}rec.knewCount=(rec.knewCount||0)+1;rec.flashWrongCount=0;rec.fuzzyCount=0;}
     sv();
   }
-  fi++;renderFlashCard();renderFlashStats();updHdr();
+  fi++;saveFlashProgress();renderFlashCard();renderFlashStats();updHdr();
 }
 function fcSkip(){fi++;renderFlashCard();}
 
