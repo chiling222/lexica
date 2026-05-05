@@ -416,17 +416,13 @@ function buildFlashBatch(forceExtra=false){
   if(batch.length<BATCH&&forceExtra){const bIds=new Set(batch.map(w=>w.id));const extras=db.filter(w=>w.status!=='graduated'&&!bIds.has(w.id)).sort(()=>Math.random()-.5).slice(0,BATCH-batch.length);batch=[...batch,...extras];}
   return batch.sort(()=>Math.random()-.5);
 }
-function initFlash(forceExtra=false){
-  if(!forceExtra&&loadFlashProgress()){
-    // 有今天的進度，繼續
-    fFlipped=false;
-    renderFlashStats();renderFlashCard();
-    return;
+function initFlash(forceExtra=false, forceNew=false){
+  if(!forceExtra && !forceNew && loadFlashProgress()){
+    fFlipped=false;renderFlashStats();renderFlashCard();return;
   }
   FQ=buildFlashBatch(forceExtra);
   fi=0;fFlipped=false;fBatchSeen=new Set();
-  saveFlashProgress();
-  renderFlashStats();renderFlashCard();
+  saveFlashProgress();renderFlashStats();renderFlashCard();
 }
 function renderFlashStats(){
   document.getElementById('fl-stats').innerHTML=`
@@ -442,7 +438,7 @@ function renderFlashCard(){
     const shownIds=new Set(FQ.map(w=>w.id));
     const moreLeft=db.filter(w=>isDue(w)&&!shownIds.has(w.id)).length;
     const nx=db.filter(w=>w.status!=='graduated'&&w.nextReview>now()).sort((a,b)=>a.nextReview-b.nextReview)[0];
-    if(moreLeft>0){wrap.innerHTML=`<div class="done-card"><span class="big">本輪完成 ✓</span><p style="color:var(--sepia);font-size:.88rem;margin-bottom:16px">還有 <strong style="color:var(--rust)">${moreLeft}</strong> 個今日到期單字</p><button class="btn btn-ink" onclick="initFlash()">繼續下一組（${Math.min(BATCH,moreLeft)}張）</button><button class="btn btn-out" style="margin-top:8px" onclick="goTab('quiz',document.querySelectorAll('.bnav-btn')[2])">切換到測驗模式 ✏️</button></div>`;}
+    if(moreLeft>0){wrap.innerHTML=`<div class="done-card"><span class="big">本輪完成 ✓</span><p style="color:var(--sepia);font-size:.88rem;margin-bottom:16px">還有 <strong style="color:var(--rust)">${moreLeft}</strong> 個今日到期單字</p><button class="btn btn-ink" onclick="initFlash(false,true)">繼續下一組（${Math.min(BATCH,moreLeft)}張）</button><button class="btn btn-out" style="margin-top:8px" onclick="goTab('quiz',document.querySelectorAll('.bnav-btn')[2])">切換到測驗模式 ✏️</button></div>`;}
     else{wrap.innerHTML=`<div class="done-card"><span class="big">今日完成 🎉</span><p style="color:var(--sepia);font-size:.88rem;margin-bottom:4px">今日所有到期單字已複習完畢！</p>${nx?`<p style="font-family:'Syne Mono',monospace;font-size:.72rem;color:var(--sepia);margin-bottom:12px">明天見 · 下次複習：${fmt(nx.nextReview)}</p>`:''}<button class="btn btn-out" style="margin-top:8px" onclick="initFlash(true)">🔁 再次挑戰（預習10個）</button><button class="btn btn-out" style="margin-top:8px" onclick="goTab('quiz',document.querySelectorAll('.bnav-btn')[2])">切換到測驗模式 ✏️</button></div>`;}
     renderFlashStats();return;
   }
@@ -556,7 +552,7 @@ function checkAns(){
   const inp=document.getElementById('blank');
   const val=inp.value.trim().toLowerCase();
   const w=Q[qi];
-  const norm=s=>s.toLowerCase().trim().replace(/\s+/g,' ');
+  const norm=s=>s.toLowerCase().trim().replace(/\s+/g,'');
   if(norm(val)===norm(w.en)){
     ansState='correct';inp.classList.add('ok');inp.disabled=true;inp.value=w.en;
     setFb('ok','✓ 答對了！');
