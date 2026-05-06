@@ -552,7 +552,7 @@ function checkAns(){
   const inp=document.getElementById('blank');
   const val=inp.value.trim().toLowerCase();
   const w=Q[qi];
-  const norm=s=>s.toLowerCase().trim().replace(/\s+/g,'');
+  const norm=s=>s.toLowerCase().trim().replace(/\s+/g,'').replace(/[^\x00-\x7F]/g,'').normalize('NFC');
   if(norm(val)===norm(w.en)){
     ansState='correct';inp.classList.add('ok');inp.disabled=true;inp.value=w.en;
     setFb('ok','✓ 答對了！');
