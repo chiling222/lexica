@@ -565,16 +565,16 @@ function checkAns(){
     hLv++;const rec=db.find(x=>x.id===w.id);const a=w.en.split('');let h='';
     if(hLv===1){
       h=a[0]+' '+'_ '.repeat(a.length-1).trim();
-      setFb('bad','✗ 提示：第一個字母是「'+a[0]+'」');
+      setFb('bad','✗ 你輸入：「'+val+'」・提示：第一個字母是「'+a[0]+'」');
       if(rec){rec.hintCount=(rec.hintCount||0)+1;sv();}
       document.getElementById('hint-box').textContent=h;document.getElementById('hint-box').style.display='block';
-      setTimeout(()=>{setFb(null);inp.value='';inp.focus();},1500);
+      setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2500);
     }else if(hLv===2){
       h=a.map((c,i)=>(i===0||i===2)?c:'_').join(' ');
-      setFb('bad','✗ 再提示一點…');
+      setFb('bad','✗ 你輸入：「'+val+'」・再提示一點…');
       if(rec){rec.hintCount=(rec.hintCount||0)+1;sv();}
       document.getElementById('hint-box').textContent=h;document.getElementById('hint-box').style.display='block';
-      setTimeout(()=>{setFb(null);inp.value='';inp.focus();},1500);
+      setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2500);
     }else{
       ansState='failed';inp.value=w.en;inp.disabled=true;
       document.getElementById('hint-box').textContent=a.join(' ');document.getElementById('hint-box').style.display='block';
