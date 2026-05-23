@@ -357,9 +357,13 @@ function pasteImport(){
   if(!raw){showAlert('paste-alert','err','請先貼上 JSON');return;}
   let words;
   try{
-    const clean=raw.replace(/"|"|„|‟/g,'"').replace(/'|'|‚|‛/g,"'").replace(/```json|```/g,'').trim();
+    const clean=raw
+      .replace(/"|"|„|‟|"/g,'"')
+      .replace(/'|'|‚|‛/g,"'")
+      .replace(/```json|```/g,'')
+      .trim();
     words=JSON.parse(clean);if(!Array.isArray(words))words=[words];
-  }catch{showAlert('paste-alert','err','格式錯誤');return;}
+  }catch(e){showAlert('paste-alert','err','格式錯誤：'+e.message);return;}
   let added=0,updated=0,skipped=0;
   words.forEach(w=>{
     if(!w.en)return;
