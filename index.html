@@ -735,6 +735,16 @@ function checkAns(){
     const nextT=rec&&rec.status==='graduated'?'🎓 畢業！':fmt(now()+(KNEW_INTERVALS[Math.min((rec&&rec.knewCount||1)-1,2)]||WEEK));
     document.getElementById('acts').innerHTML=`<button class="btn btn-green" onclick="qNxt()">下一個 →</button>
       <p style="text-align:center;font-size:.75rem;color:var(--sepia);margin-top:4px">${rec&&rec.status==='graduated'?'🎓 這個字已畢業！':'下次複習：'+nextT}</p>`;
+  }else if(hLv>=3){
+    // 4th attempt and still wrong → truly failed
+    inp.classList.add('bad');setTimeout(()=>inp.classList.remove('bad'),350);
+    ansState='failed';inp.value=w.en;inp.disabled=true;
+    document.getElementById('hint-box').textContent=a.join(' ');
+    document.getElementById('hint-box').style.display='block';
+    const rec=db.find(x=>x.id===w.id);
+    if(rec){rec.status='learning';rec.nextReview=now()+DAY;rec.wrongCount=(rec.wrongCount||0)+1;rec.knewCount=Math.max(0,(rec.knewCount||0)-1);sv();}
+    setFb('bad','✗ 答案是「'+w.en+'」，退回複習中，明天再來！');
+    document.getElementById('acts').innerHTML=`<button class="btn btn-rust" onclick="qNxt()">下一個 →</button>`;
   }else{
     inp.classList.add('bad');setTimeout(()=>inp.classList.remove('bad'),350);
     hLv++;
@@ -756,12 +766,14 @@ function checkAns(){
       document.getElementById('hint-box').style.display='block';
       setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2500);
     }else{
-      ansState='failed';inp.value=w.en;inp.disabled=true;
-      document.getElementById('hint-box').textContent=a.join(' ');
+      // 第3次錯：顯示完整提示但還給一次機會
+      h=a.join(' ');
+      setFb('bad',`✗ 你輸入：「${raw.trim()}」・最後一次機會！`);
+      if(rec){rec.hintCount=(rec.hintCount||0)+1;sv();}
+      document.getElementById('hint-box').textContent=h;
       document.getElementById('hint-box').style.display='block';
-      if(rec){rec.status='learning';rec.nextReview=now()+DAY;rec.wrongCount=(rec.wrongCount||0)+1;rec.knewCount=Math.max(0,(rec.knewCount||0)-1);sv();}
-      setFb('bad','✗ 答案是「'+w.en+'」，退回複習中，明天再來！');
-      document.getElementById('acts').innerHTML=`<button class="btn btn-rust" onclick="qNxt()">下一個 →</button>`;
+      hLv=3; // mark as last chance but don't disable
+      setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2500);
     }
   }
 }
