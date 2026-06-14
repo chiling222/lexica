@@ -36,7 +36,6 @@ async function cloudLoad(){
         const merged=[...remote];
         (window._db||[]).forEach(lw=>{if(!merged.find(r=>r.en===lw.en))merged.push(lw);});
         window._db=merged;
-        // IMPORTANT: also update local db reference
         db.length=0;merged.forEach(w=>db.push(w));
         localStorage.setItem(window._STORE,JSON.stringify(merged));
         if(window._updHdr)window._updHdr();
@@ -190,6 +189,13 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .voice-card{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
 .voice-title{font-size:.9rem;font-weight:500;color:var(--ink);margin-bottom:10px}
 .interval-legend{font-family:'Syne Mono',monospace;font-size:.68rem;color:var(--sepia);line-height:1.9;padding:10px 14px;background:var(--cream);border-radius:var(--r-sm);margin-top:8px}
+/* HANDWRITING PAD */
+.write-pad-wrap{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;box-shadow:0 1px 8px rgba(26,22,18,.07)}
+.write-pad-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.write-pad-label{font-family:'Syne Mono',monospace;font-size:.68rem;color:var(--sepia);letter-spacing:.1em;text-transform:uppercase}
+.write-pad-clear{font-family:'Noto Sans TC',sans-serif;font-size:.72rem;color:var(--sky);background:none;border:1px solid var(--warm);border-radius:99px;padding:4px 12px;cursor:pointer}
+.write-pad-clear:active{background:var(--cream)}
+.write-canvas{width:100%;height:120px;display:block;touch-action:none;border-radius:var(--r-sm);background:var(--paper);cursor:crosshair}
 </style>
 </head>
 <body>
@@ -257,7 +263,16 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
       單字庫 <strong id="tot">0</strong> 個・今日待複習 <strong id="due-n" style="color:var(--rust)">0</strong> 個
     </div>
   </div>
-  <div class="pg" id="pg-flash"><div class="stats-grid" id="fl-stats"></div><div id="fl-wrap"></div></div>
+  <div class="pg" id="pg-flash">
+    <div class="write-pad-wrap">
+      <div class="write-pad-header">
+        <span class="write-pad-label">✏️ 寫寫看，幫助記憶</span>
+        <button class="write-pad-clear" onclick="clearWritePad()">清除</button>
+      </div>
+      <canvas id="write-canvas" class="write-canvas"></canvas>
+    </div>
+    <div id="fl-wrap"></div>
+  </div>
   <div class="pg" id="pg-quiz"><div class="stats-grid" id="q-stats"></div><div id="q-wrap"></div></div>
   <div class="pg" id="pg-list"><div class="stats-grid" id="l-stats" style="margin-bottom:16px"></div><div id="list-body"></div></div>
 </div>
@@ -285,7 +300,6 @@ let db=[];
 window._STORE=STORE;
 window._db=db;
 
-/* sv() saves to localStorage + cloud, and keeps window._db in sync */
 const sv=()=>{
   localStorage.setItem(STORE,JSON.stringify(db));
   window._db=db;
@@ -357,7 +371,6 @@ function pasteImport(){
   if(!raw){showAlert('paste-alert','err','請先貼上 JSON');return;}
   let words;
   try{
-    // Replace ALL variants of curly/smart quotes before JSON parse
     const clean=raw
       .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036\u00AB\u00BB]/g,'"')
       .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g,"'")
@@ -439,37 +452,23 @@ function showAlert(id,type,msg){
   el.textContent=msg;setTimeout(()=>el.classList.remove('show'),3000);
 }
 
-/* ══════════════════════════════
-   FLASHCARD PROGRESS (localStorage)
-   Key: lexica_flash_progress
-   Stores: { date, fi, fqIds[], seenIds[] }
-   - date: today's date string (YYYY-MM-DD)
-   - fi: current card index
-   - fqIds: ordered list of word IDs in this batch
-   - seenIds: IDs of words already flipped today
-══════════════════════════════ */
+/* ══ FLASHCARD PROGRESS ══ */
 let FQ=[],fi=0,fFlipped=false,fBatchSeen=new Set();
 
 function saveFlashProgress(){
   localStorage.setItem('lexica_flash_progress',JSON.stringify({
-    date:TODAY(),
-    fi:fi,
-    fqIds:FQ.map(w=>w.id),
-    seenIds:[...fBatchSeen]
+    date:TODAY(),fi:fi,fqIds:FQ.map(w=>w.id),seenIds:[...fBatchSeen]
   }));
 }
-
 function loadFlashProgress(){
   try{
     const s=localStorage.getItem('lexica_flash_progress');
     if(!s)return false;
     const p=JSON.parse(s);
-    if(p.date!==TODAY())return false; // different day → start fresh
+    if(p.date!==TODAY())return false;
     const rebuilt=p.fqIds.map(id=>db.find(w=>w.id===id)).filter(Boolean);
     if(!rebuilt.length)return false;
-    FQ=rebuilt;
-    fi=Math.min(p.fi,FQ.length); // clamp fi in case words were deleted
-    fBatchSeen=new Set(p.seenIds||[]);
+    FQ=rebuilt;fi=Math.min(p.fi,FQ.length);fBatchSeen=new Set(p.seenIds||[]);
     return true;
   }catch{return false;}
 }
@@ -492,25 +491,24 @@ function buildFlashBatch(forceExtra=false){
   return batch.sort(()=>Math.random()-.5);
 }
 
-/* initFlash:
-   - normal entry → try to restore today's progress
-   - forceNew=true → start a new batch (next group button)
-   - forceExtra=true → preview batch from non-due words
-*/
 function initFlash(forceExtra=false,forceNew=false){
   if(!forceExtra&&!forceNew&&loadFlashProgress()){
     fFlipped=false;
     renderFlashStats();renderFlashCard();
+    setTimeout(initWritePad,50);
     return;
   }
   FQ=buildFlashBatch(forceExtra);
   fi=0;fFlipped=false;fBatchSeen=new Set();
   saveFlashProgress();
   renderFlashStats();renderFlashCard();
+  setTimeout(initWritePad,50);
 }
 
 function renderFlashStats(){
-  document.getElementById('fl-stats').innerHTML=`
+  const el=document.getElementById('fl-stats');
+  if(!el)return;
+  el.innerHTML=`
     <div class="stat-box"><div class="stat-num">${db.length}</div><div class="stat-lbl">全部</div></div>
     <div class="stat-box"><div class="stat-num" style="color:var(--rust)">${dueWords().length}</div><div class="stat-lbl">待複習</div></div>
     <div class="stat-box"><div class="stat-num" style="color:var(--forest)">${db.filter(w=>w.status==='known').length}</div><div class="stat-lbl">已熟記</div></div>
@@ -521,7 +519,6 @@ function renderFlashCard(){
   const wrap=document.getElementById('fl-wrap');
   if(!db.length){wrap.innerHTML=`<div class="empty-state"><span class="big">🃏</span><p>單字庫是空的</p><p style="margin-top:8px;font-size:.82rem">請先在「新增」加入單字</p></div>`;return;}
   if(fi>=FQ.length){
-    // batch finished — check remaining due words not yet shown
     const shownIds=new Set(FQ.map(w=>w.id));
     const moreLeft=db.filter(w=>isDue(w)&&!shownIds.has(w.id)).length;
     const nx=db.filter(w=>w.status!=='graduated'&&w.nextReview>now()).sort((a,b)=>a.nextReview-b.nextReview)[0];
@@ -544,12 +541,10 @@ function renderFlashCard(){
     renderFlashStats();return;
   }
 
-  // Render current card — always read fresh from db to get latest seenCount
   const wId=FQ[fi].id;
-  const w=db.find(x=>x.id===wId)||FQ[fi]; // always use live db data
+  const w=db.find(x=>x.id===wId)||FQ[fi];
   fFlipped=false;
 
-  // seenCount from db (live), not from FQ snapshot
   const seenCount=w.seenCount||0;
   const seenText=seenCount>0?`看過 ${seenCount} 次`:'第一次看';
   const wc=w.flashWrongCount||0;
@@ -607,16 +602,11 @@ function flipCard(){
   document.getElementById('fc-inner').classList.add('flipped');
   document.getElementById('fc-btns').style.display='block';
   const wId=FQ[fi].id;
-  // Only increment seenCount if not already flipped in this session
   if(!fBatchSeen.has(wId)){
     fBatchSeen.add(wId);
     const rec=db.find(x=>x.id===wId);
-    if(rec){
-      rec.seenCount=(rec.seenCount||0)+1;
-      rec.lastSeen=now();
-      sv(); // saves to localStorage + cloud
-    }
-    saveFlashProgress(); // save seenIds
+    if(rec){rec.seenCount=(rec.seenCount||0)+1;rec.lastSeen=now();sv();}
+    saveFlashProgress();
   }
 }
 
@@ -642,14 +632,75 @@ function fcAnswer(score){
     sv();
   }
   fi++;
-  saveFlashProgress(); // save progress after each answer
+  saveFlashProgress();
   renderFlashCard();renderFlashStats();updHdr();
+  clearWritePad();
 }
 
 function fcSkip(){
   fi++;
   saveFlashProgress();
   renderFlashCard();
+  clearWritePad();
+}
+
+/* ══ HANDWRITING PAD ══ */
+let writeCtx=null,writing=false,lastX=0,lastY=0;
+function initWritePad(){
+  const canvas=document.getElementById('write-canvas');
+  if(!canvas)return;
+  const rect=canvas.getBoundingClientRect();
+  if(rect.width===0)return;
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=rect.width*dpr;
+  canvas.height=rect.height*dpr;
+  writeCtx=canvas.getContext('2d');
+  writeCtx.scale(dpr,dpr);
+  writeCtx.lineWidth=2.5;
+  writeCtx.lineCap='round';
+  writeCtx.lineJoin='round';
+  writeCtx.strokeStyle='#3a6b8a';
+  drawGuideLine(rect);
+  if(!canvas._bound){
+    canvas.addEventListener('pointerdown',startWrite);
+    canvas.addEventListener('pointermove',moveWrite);
+    canvas.addEventListener('pointerup',endWrite);
+    canvas.addEventListener('pointerleave',endWrite);
+    canvas._bound=true;
+  }
+}
+function drawGuideLine(rect){
+  if(!writeCtx)return;
+  writeCtx.save();
+  writeCtx.strokeStyle='#d4c9b0';writeCtx.lineWidth=1;writeCtx.setLineDash([4,4]);
+  const y=rect.height*0.68;
+  writeCtx.beginPath();writeCtx.moveTo(10,y);writeCtx.lineTo(rect.width-10,y);writeCtx.stroke();
+  writeCtx.restore();
+  writeCtx.strokeStyle='#3a6b8a';writeCtx.lineWidth=2.5;writeCtx.setLineDash([]);
+}
+function getPos(e,canvas){
+  const rect=canvas.getBoundingClientRect();
+  return{x:e.clientX-rect.left,y:e.clientY-rect.top};
+}
+function startWrite(e){
+  writing=true;
+  const pos=getPos(e,e.target);
+  lastX=pos.x;lastY=pos.y;
+}
+function moveWrite(e){
+  if(!writing||!writeCtx)return;
+  e.preventDefault();
+  const pos=getPos(e,e.target);
+  writeCtx.beginPath();writeCtx.moveTo(lastX,lastY);writeCtx.lineTo(pos.x,pos.y);writeCtx.stroke();
+  lastX=pos.x;lastY=pos.y;
+}
+function endWrite(){writing=false;}
+function clearWritePad(){
+  const canvas=document.getElementById('write-canvas');
+  if(!canvas||!writeCtx)return;
+  const rect=canvas.getBoundingClientRect();
+  writeCtx.clearRect(0,0,canvas.width,canvas.height);
+  drawGuideLine(rect);
 }
 
 /* ══ QUIZ ══ */
@@ -716,7 +767,6 @@ function checkAns(){
   if(ansState!=='input')return;
   const inp=document.getElementById('blank');
   const raw=inp.value;
-  // Aggressive normalize: lowercase, remove all whitespace, remove non-ASCII, NFC
   const norm=s=>s.toLowerCase().replace(/\s/g,'').replace(/[^\x20-\x7E]/g,'').trim();
   const val=norm(raw);
   const w=Q[qi];
@@ -735,16 +785,6 @@ function checkAns(){
     const nextT=rec&&rec.status==='graduated'?'🎓 畢業！':fmt(now()+(KNEW_INTERVALS[Math.min((rec&&rec.knewCount||1)-1,2)]||WEEK));
     document.getElementById('acts').innerHTML=`<button class="btn btn-green" onclick="qNxt()">下一個 →</button>
       <p style="text-align:center;font-size:.75rem;color:var(--sepia);margin-top:4px">${rec&&rec.status==='graduated'?'🎓 這個字已畢業！':'下次複習：'+nextT}</p>`;
-  }else if(hLv>=3){
-    // 4th attempt and still wrong → truly failed
-    inp.classList.add('bad');setTimeout(()=>inp.classList.remove('bad'),350);
-    ansState='failed';inp.value=w.en;inp.disabled=true;
-    document.getElementById('hint-box').textContent=a.join(' ');
-    document.getElementById('hint-box').style.display='block';
-    const rec=db.find(x=>x.id===w.id);
-    if(rec){rec.status='learning';rec.nextReview=now()+DAY;rec.wrongCount=(rec.wrongCount||0)+1;rec.knewCount=Math.max(0,(rec.knewCount||0)-1);sv();}
-    setFb('bad','✗ 答案是「'+w.en+'」，退回複習中，明天再來！');
-    document.getElementById('acts').innerHTML=`<button class="btn btn-rust" onclick="qNxt()">下一個 →</button>`;
   }else{
     inp.classList.add('bad');setTimeout(()=>inp.classList.remove('bad'),350);
     hLv++;
@@ -752,7 +792,6 @@ function checkAns(){
     const a=w.en.split('');let h='';
     if(hLv===1){
       h=a[0]+' '+'_ '.repeat(a.length-1).trim();
-      // Show what user typed vs answer for debugging
       setFb('bad',`✗ 你輸入：「${raw.trim()}」・提示：第一個字母是「${a[0]}」`);
       if(rec){rec.hintCount=(rec.hintCount||0)+1;sv();}
       document.getElementById('hint-box').textContent=h;
@@ -766,14 +805,13 @@ function checkAns(){
       document.getElementById('hint-box').style.display='block';
       setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2500);
     }else{
-      // 第3次錯：顯示完整提示但還給一次機會
-      h=a.join(' ');
-      setFb('bad',`✗ 你輸入：「${raw.trim()}」・最後一次機會！`);
-      if(rec){rec.hintCount=(rec.hintCount||0)+1;sv();}
-      document.getElementById('hint-box').textContent=h;
+      // 第3次錯：直接退回閃卡複習
+      ansState='failed';inp.value=w.en;inp.disabled=true;
+      document.getElementById('hint-box').textContent=a.join(' ');
       document.getElementById('hint-box').style.display='block';
-      hLv=3; // mark as last chance but don't disable
-      setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2500);
+      if(rec){rec.status='learning';rec.nextReview=now()+DAY;rec.wrongCount=(rec.wrongCount||0)+1;rec.knewCount=Math.max(0,(rec.knewCount||0)-1);sv();}
+      setFb('bad','✗ 答案是「'+w.en+'」，退回閃卡複習，明天再來！');
+      document.getElementById('acts').innerHTML=`<button class="btn btn-rust" onclick="qNxt()">下一個 →</button>`;
     }
   }
 }
