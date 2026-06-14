@@ -128,11 +128,11 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .flip-hint{animation:bounce 1.2s ease infinite;display:inline-block}
 .fc-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
-.btn-again{background:var(--red-bg);color:var(--rust);border:1.5px solid rgba(196,98,45,.25);font-size:.85rem;padding:14px 6px;line-height:1.4;border-radius:var(--r-sm)}
+.btn-again{background:var(--red-bg);color:var(--rust);border:1.5px solid rgba(196,98,45,.25);font-size:.85rem;padding:7px 6px;line-height:1.4;border-radius:var(--r-sm)}
 .btn-again:active{background:#f0d8d2}
-.btn-fuzzy{background:#fef9ec;color:var(--gold);border:1.5px solid rgba(184,148,31,.25);font-size:.85rem;padding:14px 6px;line-height:1.4;border-radius:var(--r-sm)}
+.btn-fuzzy{background:#fef9ec;color:var(--gold);border:1.5px solid rgba(184,148,31,.25);font-size:.85rem;padding:7px 6px;line-height:1.4;border-radius:var(--r-sm)}
 .btn-fuzzy:active{background:#faefc8}
-.btn-knew{background:var(--green-bg);color:var(--forest);border:1.5px solid rgba(61,107,79,.25);font-size:.85rem;padding:14px 6px;line-height:1.4;border-radius:var(--r-sm)}
+.btn-knew{background:var(--green-bg);color:var(--forest);border:1.5px solid rgba(61,107,79,.25);font-size:.85rem;padding:7px 6px;line-height:1.4;border-radius:var(--r-sm)}
 .btn-knew:active{background:#cde5d4}
 .fc-prog{display:flex;align-items:center;gap:10px;font-family:'Syne Mono',monospace;font-size:.72rem;color:var(--sepia);margin-bottom:14px}
 .pbar{flex:1;height:3px;background:var(--cream);border-radius:99px;overflow:hidden}
@@ -634,14 +634,14 @@ function fcAnswer(score){
   fi++;
   saveFlashProgress();
   renderFlashCard();renderFlashStats();updHdr();
-  clearWritePad();
+  setTimeout(initWritePad,50);
 }
 
 function fcSkip(){
   fi++;
   saveFlashProgress();
   renderFlashCard();
-  clearWritePad();
+  setTimeout(initWritePad,50);
 }
 
 /* ══ HANDWRITING PAD ══ */
@@ -650,7 +650,7 @@ function initWritePad(){
   const canvas=document.getElementById('write-canvas');
   if(!canvas)return;
   const rect=canvas.getBoundingClientRect();
-  if(rect.width===0)return;
+  if(rect.width===0){setTimeout(initWritePad,50);return;}
   const dpr=window.devicePixelRatio||1;
   canvas.width=rect.width*dpr;
   canvas.height=rect.height*dpr;
@@ -661,13 +661,11 @@ function initWritePad(){
   writeCtx.lineJoin='round';
   writeCtx.strokeStyle='#3a6b8a';
   drawGuideLine(rect);
-  if(!canvas._bound){
-    canvas.addEventListener('pointerdown',startWrite);
-    canvas.addEventListener('pointermove',moveWrite);
-    canvas.addEventListener('pointerup',endWrite);
-    canvas.addEventListener('pointerleave',endWrite);
-    canvas._bound=true;
-  }
+  // always rebind — canvas element is recreated on every render
+  canvas.onpointerdown=startWrite;
+  canvas.onpointermove=moveWrite;
+  canvas.onpointerup=endWrite;
+  canvas.onpointerleave=endWrite;
 }
 function drawGuideLine(rect){
   if(!writeCtx)return;
