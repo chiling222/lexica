@@ -264,13 +264,6 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
     </div>
   </div>
   <div class="pg" id="pg-flash">
-    <div class="write-pad-wrap">
-      <div class="write-pad-header">
-        <span class="write-pad-label">✏️ 寫寫看，幫助記憶</span>
-        <button class="write-pad-clear" onclick="clearWritePad()">清除</button>
-      </div>
-      <canvas id="write-canvas" class="write-canvas"></canvas>
-    </div>
     <div id="fl-wrap"></div>
   </div>
   <div class="pg" id="pg-quiz"><div class="stats-grid" id="q-stats"></div><div id="q-wrap"></div></div>
@@ -579,6 +572,13 @@ function renderFlashCard(){
           <button class="speak-btn" style="width:auto;border-radius:14px;padding:0 12px;gap:4px;font-size:.78rem;height:30px;margin-bottom:8px" onclick="speak('${w.sentence.replace('__',w.en).replace(/'/g,"\\'")}',this)">🔊 例句</button>
         </div>
       </div>
+    </div>
+    <div class="write-pad-wrap">
+      <div class="write-pad-header">
+        <span class="write-pad-label">✏️ 寫寫看，幫助記憶</span>
+        <button class="write-pad-clear" onclick="clearWritePad()">清除</button>
+      </div>
+      <canvas id="write-canvas" class="write-canvas"></canvas>
     </div>
     <div id="fc-btns" style="display:none">
       <div class="fc-actions">
