@@ -128,11 +128,12 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .flip-hint{animation:bounce 1.2s ease infinite;display:inline-block}
 .fc-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
-.btn-again{background:var(--red-bg);color:var(--rust);border:1.5px solid rgba(196,98,45,.25);font-size:.85rem;padding:7px 6px;line-height:1.4;border-radius:var(--r-sm)}
+.fc-act-btn{display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border-radius:var(--r-sm);font-family:'Noto Sans TC',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .15s;border:1.5px solid transparent;white-space:nowrap}
+.btn-again{background:var(--red-bg);color:var(--rust);border-color:rgba(196,98,45,.25)}
 .btn-again:active{background:#f0d8d2}
-.btn-fuzzy{background:#fef9ec;color:var(--gold);border:1.5px solid rgba(184,148,31,.25);font-size:.85rem;padding:7px 6px;line-height:1.4;border-radius:var(--r-sm)}
+.btn-fuzzy{background:#fef9ec;color:var(--gold);border-color:rgba(184,148,31,.25)}
 .btn-fuzzy:active{background:#faefc8}
-.btn-knew{background:var(--green-bg);color:var(--forest);border:1.5px solid rgba(61,107,79,.25);font-size:.85rem;padding:7px 6px;line-height:1.4;border-radius:var(--r-sm)}
+.btn-knew{background:var(--green-bg);color:var(--forest);border-color:rgba(61,107,79,.25)}
 .btn-knew:active{background:#cde5d4}
 .fc-prog{display:flex;align-items:center;gap:10px;font-family:'Syne Mono',monospace;font-size:.72rem;color:var(--sepia);margin-bottom:14px}
 .pbar{flex:1;height:3px;background:var(--cream);border-radius:99px;overflow:hidden}
@@ -582,9 +583,9 @@ function renderFlashCard(){
     </div>
     <div id="fc-btns" style="display:none">
       <div class="fc-actions">
-        <button class="btn btn-again" onclick="fcAnswer(0)">✗<br>完全<br>不記得</button>
-        <button class="btn btn-fuzzy" onclick="fcAnswer(1)">△<br>模糊<br>記得</button>
-        <button class="btn btn-knew" onclick="fcAnswer(2)">✓<br>清楚<br>記得</button>
+        <button class="fc-act-btn btn-again" onclick="fcAnswer(0)">✗ 不記得</button>
+        <button class="fc-act-btn btn-fuzzy" onclick="fcAnswer(1)">△ 模糊</button>
+        <button class="fc-act-btn btn-knew" onclick="fcAnswer(2)">✓ 記得</button>
       </div>
       <div class="interval-legend">
         ✗ 不記得 → 明天再見<br>
