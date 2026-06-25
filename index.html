@@ -92,7 +92,7 @@ body{background:var(--paper);color:var(--ink);font-family:'Noto Sans TC',sans-se
 .fl{display:block;font-size:.68rem;color:var(--sepia);letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px;font-weight:500}
 .fl em{text-transform:none;letter-spacing:0;font-style:normal;color:var(--forest)}
 input[type=text],textarea,select{width:100%;background:var(--paper);border:1.5px solid var(--warm);border-radius:var(--r-sm);font-family:'Noto Sans TC',sans-serif;font-size:1rem;color:var(--ink);padding:11px 13px;outline:none;-webkit-appearance:none;transition:border-color .2s;}
-input[type=text]:focus,textarea:focus{border-color:var(--sepia)}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--sepia)}
 textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.7}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:13px 20px;border:none;border-radius:var(--r-sm);font-family:'Noto Sans TC',sans-serif;font-size:.95rem;cursor:pointer;font-weight:500;transition:all .15s;-webkit-appearance:none;width:100%;}
 .btn+.btn{margin-top:8px}
@@ -107,27 +107,34 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .speak-btn:active{background:var(--sky);color:#fff}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 .speak-btn.speaking{background:var(--sky);color:#fff;animation:pulse .5s ease infinite}
+/* TAG PILLS */
+.tag-bar{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;margin-bottom:8px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.tag-bar::-webkit-scrollbar{display:none}
+.tag-pill{font-family:'Syne Mono',monospace;font-size:.7rem;padding:5px 14px;border-radius:99px;border:1.5px solid var(--warm);background:#fff;color:var(--sepia);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;}
+.tag-pill.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+/* FLASHCARD */
 .fc-wrap{perspective:1200px;margin-bottom:16px}
-.fc-inner{position:relative;width:100%;min-height:320px;transform-style:preserve-3d;transition:transform .5s ease;cursor:pointer;}
+.fc-inner{position:relative;width:100%;min-height:260px;transform-style:preserve-3d;transition:transform .5s ease;cursor:pointer;}
 .fc-inner.flipped{transform:rotateY(180deg)}
-.fc-front,.fc-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--r);padding:28px 22px;display:flex;flex-direction:column;box-shadow:0 2px 16px rgba(26,22,18,.1);}
+.fc-front,.fc-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--r);padding:20px 22px;display:flex;flex-direction:column;box-shadow:0 2px 16px rgba(26,22,18,.1);}
 .fc-front{background:#fff;border:1px solid var(--warm);align-items:center;justify-content:center;text-align:center;}
 .fc-front.danger{background:#fff8f6;border-color:rgba(196,98,45,.4)}
 .fc-back{background:linear-gradient(135deg,#fff,#faf7f2);border:1px solid var(--warm);transform:rotateY(180deg);}
-.fc-tag{font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--sepia);letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px}
-.fc-wrong-badge{font-family:'Syne Mono',monospace;font-size:.72rem;background:var(--red-bg);color:var(--rust);border:1.5px solid rgba(196,98,45,.3);padding:4px 12px;border-radius:99px;margin-bottom:12px;display:inline-block}
-.fc-en{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:var(--ink);margin-bottom:8px;line-height:1.3;word-break:break-word;max-width:100%}
-.fc-phonetic{font-family:'Syne Mono',monospace;font-size:.9rem;color:var(--sky);margin-bottom:16px}
-.fc-hint{font-size:.78rem;color:var(--sepia);margin-top:auto;padding-top:16px;font-style:italic}
-.fc-back-zh{font-size:1.5rem;font-weight:500;color:var(--ink);margin-bottom:12px}
-.fc-back-phonetic{font-family:'Syne Mono',monospace;font-size:.82rem;color:var(--sky);margin-bottom:16px}
-.fc-back-sent{font-family:'Cormorant Garamond',serif;font-size:1.05rem;line-height:1.75;color:var(--sepia);padding:12px 14px;background:var(--paper);border-radius:var(--r-sm);border-left:3px solid var(--rust);margin-bottom:14px}
+.fc-tag{font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--sepia);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px}
+.fc-wrong-badge{font-family:'Syne Mono',monospace;font-size:.72rem;background:var(--red-bg);color:var(--rust);border:1.5px solid rgba(196,98,45,.3);padding:3px 12px;border-radius:99px;margin-bottom:8px;display:inline-block}
+.fc-en{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:600;color:var(--ink);margin-bottom:6px;line-height:1.3;word-break:break-word;max-width:100%}
+.fc-phonetic{font-family:'Syne Mono',monospace;font-size:.9rem;color:var(--sky);margin-bottom:10px}
+.fc-hint{font-size:.78rem;color:var(--sepia);margin-top:auto;padding-top:12px;font-style:italic}
+.fc-back-zh{font-size:1.4rem;font-weight:500;color:var(--ink);margin-bottom:8px}
+.fc-back-phonetic{font-family:'Syne Mono',monospace;font-size:.82rem;color:var(--sky);margin-bottom:12px}
+.fc-back-sent{font-family:'Cormorant Garamond',serif;font-size:1rem;line-height:1.7;color:var(--sepia);padding:10px 14px;background:var(--paper);border-radius:var(--r-sm);border-left:3px solid var(--rust);margin-bottom:10px}
 .fc-back-sent strong{color:var(--rust);font-style:normal}
-.fc-meta{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.fc-meta{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
 .fc-seen{font-family:'Syne Mono',monospace;font-size:.68rem;color:var(--sepia);background:var(--cream);padding:3px 10px;border-radius:99px}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .flip-hint{animation:bounce 1.2s ease infinite;display:inline-block}
-.fc-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+/* FC ACTIONS */
+.fc-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
 .fc-act-btn{display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border-radius:var(--r-sm);font-family:'Noto Sans TC',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .15s;border:1.5px solid transparent;white-space:nowrap}
 .btn-again{background:var(--red-bg);color:var(--rust);border-color:rgba(196,98,45,.25)}
 .btn-again:active{background:#f0d8d2}
@@ -135,9 +142,18 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .btn-fuzzy:active{background:#faefc8}
 .btn-knew{background:var(--green-bg);color:var(--forest);border-color:rgba(61,107,79,.25)}
 .btn-knew:active{background:#cde5d4}
-.fc-prog{display:flex;align-items:center;gap:10px;font-family:'Syne Mono',monospace;font-size:.72rem;color:var(--sepia);margin-bottom:14px}
+.fc-prog{display:flex;align-items:center;gap:10px;font-family:'Syne Mono',monospace;font-size:.72rem;color:var(--sepia);margin-bottom:12px}
 .pbar{flex:1;height:3px;background:var(--cream);border-radius:99px;overflow:hidden}
 .pfill{height:100%;background:linear-gradient(90deg,var(--sky),var(--forest));border-radius:99px;transition:width .4s}
+.interval-legend{font-family:'Syne Mono',monospace;font-size:.65rem;color:var(--sepia);line-height:1.8;padding:8px 14px;background:var(--cream);border-radius:var(--r-sm)}
+/* HANDWRITING */
+.write-pad-wrap{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 8px rgba(26,22,18,.07)}
+.write-pad-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.write-pad-label{font-family:'Syne Mono',monospace;font-size:.65rem;color:var(--sepia);letter-spacing:.1em;text-transform:uppercase}
+.write-pad-clear{font-family:'Noto Sans TC',sans-serif;font-size:.7rem;color:var(--sky);background:none;border:1px solid var(--warm);border-radius:99px;padding:3px 10px;cursor:pointer}
+.write-pad-clear:active{background:var(--cream)}
+.write-canvas{width:100%;height:100px;display:block;touch-action:none;border-radius:var(--r-sm);background:var(--paper);cursor:crosshair}
+/* QUIZ */
 .quiz-card{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:22px 18px;box-shadow:0 1px 8px rgba(26,22,18,.07);position:relative;overflow:hidden}
 .quiz-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--rust)}
 .rtag{font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--sepia);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;padding-left:4px}
@@ -156,6 +172,7 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .fb-bad{background:var(--red-bg);color:var(--rust);border:1px solid rgba(196,98,45,.2)}
 .acts{display:flex;flex-direction:column;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--cream)}
 .acts-row{display:flex;gap:8px}.acts-row .btn{flex:1;margin:0}
+/* WORD LIST */
 .word-item{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(26,22,18,.06);}
 .wi-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .wi-en{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;flex:1}
@@ -168,6 +185,7 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .b-learning{background:var(--blue-bg);color:var(--sky);border:1px solid rgba(58,107,138,.25)}
 .b-known{background:var(--green-bg);color:var(--forest);border:1px solid rgba(61,107,79,.25)}
 .b-graduated{background:var(--purple-bg);color:var(--purple);border:1px solid rgba(107,79,160,.25)}
+.tag-badge{font-family:'Syne Mono',monospace;font-size:.62rem;padding:2px 9px;border-radius:99px;background:var(--blue-bg);color:var(--sky);border:1px solid rgba(58,107,138,.2)}
 .seen-badge{font-family:'Syne Mono',monospace;font-size:.62rem;padding:2px 9px;border-radius:99px;background:var(--cream);color:var(--sepia);border:1px solid var(--warm)}
 .del-btn{margin-left:auto;font-size:.75rem;color:var(--rust);background:none;border:none;cursor:pointer;padding:4px 8px;font-family:'Noto Sans TC',sans-serif}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px}
@@ -189,14 +207,6 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .alert-err{background:var(--red-bg);color:var(--rust);border:1px solid rgba(196,98,45,.2)}
 .voice-card{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:16px 18px;margin-bottom:14px}
 .voice-title{font-size:.9rem;font-weight:500;color:var(--ink);margin-bottom:10px}
-.interval-legend{font-family:'Syne Mono',monospace;font-size:.68rem;color:var(--sepia);line-height:1.9;padding:10px 14px;background:var(--cream);border-radius:var(--r-sm);margin-top:8px}
-/* HANDWRITING PAD */
-.write-pad-wrap{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:12px 14px;margin-bottom:14px;box-shadow:0 1px 8px rgba(26,22,18,.07)}
-.write-pad-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.write-pad-label{font-family:'Syne Mono',monospace;font-size:.68rem;color:var(--sepia);letter-spacing:.1em;text-transform:uppercase}
-.write-pad-clear{font-family:'Noto Sans TC',sans-serif;font-size:.72rem;color:var(--sky);background:none;border:1px solid var(--warm);border-radius:99px;padding:4px 12px;cursor:pointer}
-.write-pad-clear:active{background:var(--cream)}
-.write-canvas{width:100%;height:120px;display:block;touch-action:none;border-radius:var(--r-sm);background:var(--paper);cursor:crosshair}
 </style>
 </head>
 <body>
@@ -212,6 +222,7 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
   </div>
 </div>
 <div class="pages">
+  <!-- ADD -->
   <div class="pg on" id="pg-add">
     <div class="card">
       <div class="card-title">✦ 新增單字</div>
@@ -221,11 +232,20 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
       </div>
       <div id="panel-claude">
         <div style="background:var(--blue-bg);border-radius:var(--r-sm);padding:14px;margin-bottom:14px;font-size:.83rem;color:var(--sky);line-height:1.8;border:1px solid rgba(58,107,138,.2)">
-          <strong>使用方式：</strong><br>1. 在 Claude.ai 說：「幫我查 單字1, 單字2」<br>2. 複製 Claude 給的 JSON<br>3. 貼到下方，按「匯入」
+          <strong>使用方式：</strong><br>1. 在 Claude.ai 說：「幫我查 單字1, 單字2」<br>2. 複製 Claude 給的 JSON<br>3. 選擇分類，按「匯入」
         </div>
         <div class="field">
           <label class="fl">貼上 Claude 給的 JSON</label>
           <textarea id="paste-area" rows="4" placeholder='[{"en":"stir","phonetic":"/stɜːr/","zh":"攪拌","sentence":"She __ the soup slowly.","sentenceZh":"她慢慢地攪拌湯。"}]' style="font-family:monospace;font-size:.82rem"></textarea>
+        </div>
+        <div class="field">
+          <label class="fl">分類 TAG <em>— 不填為「日常」</em></label>
+          <div style="display:flex;gap:8px">
+            <select id="import-tag-select" style="flex:1" onchange="onImportTagSelectChange()">
+              <option value="日常">日常</option>
+            </select>
+            <input type="text" id="import-tag-new" placeholder="新分類名稱" style="flex:1;display:none" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+          </div>
         </div>
         <button class="btn btn-ink" onclick="pasteImport()">⬇ 匯入單字</button>
         <div class="alert" id="paste-alert" style="margin-top:10px"></div>
@@ -236,6 +256,15 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
         <div class="field"><label class="fl">中文意思</label><input type="text" id="f-zh" placeholder="e.g. 堅持、毅然"/></div>
         <div class="field"><label class="fl">例句 <em>— 用 __ 標示填空</em></label><textarea id="f-sent" rows="3" placeholder="She __ through every hardship."></textarea></div>
         <div class="field"><label class="fl">例句中文翻譯 <em>— 選填</em></label><input type="text" id="f-sent-zh" placeholder="e.g. 她毅然撐過每一個難關。"/></div>
+        <div class="field">
+          <label class="fl">分類 TAG <em>— 不填為「日常」</em></label>
+          <div style="display:flex;gap:8px">
+            <select id="manual-tag-select" style="flex:1" onchange="onManualTagSelectChange()">
+              <option value="日常">日常</option>
+            </select>
+            <input type="text" id="manual-tag-new" placeholder="新分類名稱" style="flex:1;display:none" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"/>
+          </div>
+        </div>
         <button class="btn btn-green" onclick="addWord()">✦ 加入單字庫</button>
         <div class="alert" id="add-alert" style="margin-top:10px"></div>
       </div>
@@ -264,11 +293,23 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
       單字庫 <strong id="tot">0</strong> 個・今日待複習 <strong id="due-n" style="color:var(--rust)">0</strong> 個
     </div>
   </div>
+  <!-- FLASH -->
   <div class="pg" id="pg-flash">
+    <div class="tag-bar" id="flash-tag-bar"></div>
     <div id="fl-wrap"></div>
   </div>
-  <div class="pg" id="pg-quiz"><div class="stats-grid" id="q-stats"></div><div id="q-wrap"></div></div>
-  <div class="pg" id="pg-list"><div class="stats-grid" id="l-stats" style="margin-bottom:16px"></div><div id="list-body"></div></div>
+  <!-- QUIZ -->
+  <div class="pg" id="pg-quiz">
+    <div class="tag-bar" id="quiz-tag-bar"></div>
+    <div class="stats-grid" id="q-stats"></div>
+    <div id="q-wrap"></div>
+  </div>
+  <!-- LIST -->
+  <div class="pg" id="pg-list">
+    <div class="tag-bar" id="list-tag-bar"></div>
+    <div class="stats-grid" id="l-stats" style="margin-bottom:16px"></div>
+    <div id="list-body"></div>
+  </div>
 </div>
 <nav class="bottom-nav">
   <button class="bnav-btn on" onclick="goTab('add',this)"><span class="icon">＋</span>新增</button>
@@ -280,30 +321,44 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 const STORE='lexica_data';
 const DAY=24*60*60*1000,WEEK=7*DAY,BATCH=10;
 const KNEW_INTERVALS=[7*DAY,14*DAY,28*DAY];
+const DEFAULT_TAG='日常';
 
-/* ══ DATA ══ */
 let db=[];
 (function(){
   const oldKeys=['lexica_v9','lexica_v8','lexica_v7','lexica_v6','lexica_v5','lexica_v4','lexica_v3'];
   try{
     const s=localStorage.getItem(STORE);
-    if(s){db=JSON.parse(s)||[];return;}
-    for(const k of oldKeys){const o=localStorage.getItem(k);if(o){const p=JSON.parse(o);if(Array.isArray(p)&&p.length){db=p;localStorage.setItem(STORE,JSON.stringify(db));localStorage.removeItem(k);return;}}}
+    if(s){db=JSON.parse(s)||[];
+      // migrate: words without tag → 日常
+      db.forEach(w=>{if(!w.tag)w.tag=DEFAULT_TAG;});
+      return;
+    }
+    for(const k of oldKeys){const o=localStorage.getItem(k);if(o){const p=JSON.parse(o);if(Array.isArray(p)&&p.length){db=p;db.forEach(w=>{if(!w.tag)w.tag=DEFAULT_TAG;});localStorage.setItem(STORE,JSON.stringify(db));localStorage.removeItem(k);return;}}}
   }catch(e){}
 })();
 window._STORE=STORE;
 window._db=db;
 
-const sv=()=>{
-  localStorage.setItem(STORE,JSON.stringify(db));
-  window._db=db;
-  if(window._cloudSave)window._cloudSave();
-};
+const sv=()=>{localStorage.setItem(STORE,JSON.stringify(db));window._db=db;if(window._cloudSave)window._cloudSave();};
 const now=()=>Date.now();
 const fmt=ts=>new Date(ts).toLocaleDateString('zh-TW',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
 const TODAY=()=>new Date().toISOString().slice(0,10);
 const isDue=w=>w.status!=='graduated'&&w.nextReview<=now();
 const dueWords=()=>db.filter(isDue);
+
+// Get all unique tags
+function allTags(){
+  const tags=new Set(db.map(w=>w.tag||DEFAULT_TAG));
+  return[DEFAULT_TAG,...[...tags].filter(t=>t!==DEFAULT_TAG).sort()];
+}
+
+// Current selected tags per page
+let flashTag='全部',quizTag='全部',listTag='全部';
+
+function filteredDb(tag){
+  if(tag==='全部')return db;
+  return db.filter(w=>(w.tag||DEFAULT_TAG)===tag);
+}
 
 function updHdr(){
   const n=dueWords().length;
@@ -314,13 +369,22 @@ function updHdr(){
 }
 window._updHdr=updHdr;
 
+function renderTagBar(barId,current,onSelect){
+  const bar=document.getElementById(barId);
+  if(!bar)return;
+  const tags=['全部',...allTags().filter(t=>t!=='全部'||true)];
+  // deduplicate
+  const uniq=['全部',...[...new Set(db.map(w=>w.tag||DEFAULT_TAG))].sort()];
+  bar.innerHTML=uniq.map(t=>`<button class="tag-pill${t===current?' on':''}" onclick="(${onSelect.toString()})('${t}')">${t}</button>`).join('');
+}
+
 function goTab(t,btn){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('on'));
   document.getElementById('pg-'+t).classList.add('on');btn.classList.add('on');
-  if(t==='flash')initFlash();
-  if(t==='quiz')initQuiz();
-  if(t==='list')renderList();
+  if(t==='flash'){renderTagBar('flash-tag-bar',flashTag,t=>{flashTag=t;initFlash(false,true);});initFlash();}
+  if(t==='quiz'){renderTagBar('quiz-tag-bar',quizTag,t=>{quizTag=t;renderTagBar('quiz-tag-bar',quizTag,arguments.callee);initQuiz();});initQuiz();}
+  if(t==='list'){renderTagBar('list-tag-bar',listTag,t=>{listTag=t;renderTagBar('list-tag-bar',listTag,arguments.callee);renderList();});renderList();}
   updHdr();
 }
 
@@ -342,8 +406,7 @@ function saveVoice(){savedVoiceName=document.getElementById('voice-select').valu
 function testVoice(){speak('Hello, this is a test.',null);}
 function getVoice(){return(savedVoiceName&&voices.find(v=>v.name===savedVoiceName))||voices.find(v=>v.lang==='en-US')||voices.find(v=>v.lang.startsWith('en'))||null;}
 function speak(text,btn){
-  if(!window.speechSynthesis)return;
-  window.speechSynthesis.cancel();
+  if(!window.speechSynthesis)return;window.speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(text);u.lang='en-US';u.rate=0.85;
   const v=getVoice();if(v)u.voice=v;
   if(btn){btn.classList.add('speaking');u.onend=u.onerror=()=>btn.classList.remove('speaking');}
@@ -359,17 +422,50 @@ function switchAddTab(tab){
   m.style.background=isClaude?'transparent':'var(--ink)';m.style.color=isClaude?'var(--sepia)':'var(--paper)';
 }
 
+/* TAG SELECT helpers */
+function updateTagSelects(){
+  const tags=allTags();
+  ['import-tag-select','manual-tag-select'].forEach(id=>{
+    const sel=document.getElementById(id);if(!sel)return;
+    const cur=sel.value;
+    sel.innerHTML=tags.map(t=>`<option value="${t}">${t}</option>`).join('')+'<option value="__new__">＋ 新增分類…</option>';
+    if(tags.includes(cur))sel.value=cur;
+  });
+}
+function onImportTagSelectChange(){
+  const sel=document.getElementById('import-tag-select');
+  const inp=document.getElementById('import-tag-new');
+  if(sel.value==='__new__'){inp.style.display='block';inp.focus();}
+  else inp.style.display='none';
+}
+function onManualTagSelectChange(){
+  const sel=document.getElementById('manual-tag-select');
+  const inp=document.getElementById('manual-tag-new');
+  if(sel.value==='__new__'){inp.style.display='block';inp.focus();}
+  else inp.style.display='none';
+}
+function getImportTag(){
+  const sel=document.getElementById('import-tag-select');
+  if(sel.value==='__new__'){const v=document.getElementById('import-tag-new').value.trim();return v||DEFAULT_TAG;}
+  return sel.value||DEFAULT_TAG;
+}
+function getManualTag(){
+  const sel=document.getElementById('manual-tag-select');
+  if(sel.value==='__new__'){const v=document.getElementById('manual-tag-new').value.trim();return v||DEFAULT_TAG;}
+  return sel.value||DEFAULT_TAG;
+}
+
 /* ══ PASTE IMPORT ══ */
 function pasteImport(){
   const raw=document.getElementById('paste-area').value.trim();
   if(!raw){showAlert('paste-alert','err','請先貼上 JSON');return;}
+  const tag=getImportTag();
   let words;
   try{
     const clean=raw
       .replace(/[\u201C\u201D\u201E\u201F\u2033\u2036\u00AB\u00BB]/g,'"')
       .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g,"'")
-      .replace(/```json|```/g,'')
-      .trim();
+      .replace(/```json|```/g,'').trim();
     words=JSON.parse(clean);if(!Array.isArray(words))words=[words];
   }catch(e){showAlert('paste-alert','err','格式錯誤：'+e.message);return;}
   let added=0,updated=0,skipped=0;
@@ -389,17 +485,18 @@ function pasteImport(){
       if(ch)updated++;else skipped++;return;
     }
     if(!w.sentence)return;
-    db.push(newWord(w));added++;
+    db.push(newWord({...w,tag}));added++;
   });
-  sv();updHdr();
+  sv();updHdr();updateTagSelects();
   const msg=[];if(added>0)msg.push('新增 '+added+' 個');if(updated>0)msg.push('更新 '+updated+' 個');if(skipped>0)msg.push(skipped+' 個無變動');
-  if(msg.length){showAlert('paste-alert','ok','✓ '+msg.join('・'));document.getElementById('paste-area').value='';}
+  if(msg.length){showAlert('paste-alert','ok','✓ '+msg.join('・')+'（'+tag+'）');document.getElementById('paste-area').value='';}
   else showAlert('paste-alert','err','沒有可匯入的單字');
 }
 
 function newWord(w){
   return{id:Date.now()+Math.random(),en:w.en.toLowerCase(),phonetic:w.phonetic||'',zh:w.zh||'',
     sentence:w.sentence,sentenceZh:w.sentenceZh||'',
+    tag:w.tag||DEFAULT_TAG,
     status:'new',nextReview:now(),
     wrongCount:0,hintCount:0,seenCount:0,lastSeen:null,
     knewCount:0,fuzzyCount:0,flashWrongCount:0};
@@ -411,13 +508,15 @@ function addWord(){
   const phonetic=document.getElementById('f-phonetic').value.trim();
   const sentence=document.getElementById('f-sent').value.trim();
   const sentenceZh=document.getElementById('f-sent-zh')?document.getElementById('f-sent-zh').value.trim():'';
+  const tag=getManualTag();
   if(!en){showAlert('add-alert','err','請輸入英文單字');return;}
   if(!sentence.includes('__')){showAlert('add-alert','err','例句需要 __ 作為填空位置');return;}
   if(db.find(w=>w.en===en)&&!confirm('「'+en+'」已存在，確定再加入？'))return;
-  db.push(newWord({en,zh,phonetic,sentence,sentenceZh}));sv();
+  db.push(newWord({en,zh,phonetic,sentence,sentenceZh,tag}));sv();
   ['f-word','f-zh','f-phonetic','f-sent','f-sent-zh'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('f-word').focus();
-  showAlert('add-alert','ok','✓「'+en+'」已加入！');updHdr();
+  showAlert('add-alert','ok','✓「'+en+'」已加入（'+tag+'）！');
+  updHdr();updateTagSelects();
 }
 
 function exportBackup(){
@@ -433,8 +532,12 @@ function importBackup(input){
     try{
       const data=JSON.parse(e.target.result);if(!Array.isArray(data))throw new Error();
       let added=0;
-      data.forEach(w=>{if(!w.en)return;if(db.find(x=>x.en===w.en))return;db.push({seenCount:0,lastSeen:null,knewCount:0,fuzzyCount:0,flashWrongCount:0,...w,id:w.id||Date.now()+Math.random()});added++;});
-      sv();updHdr();showAlert('backup-alert','ok','✓ 匯入 '+added+' 個單字');
+      data.forEach(w=>{
+        if(!w.en)return;if(db.find(x=>x.en===w.en))return;
+        db.push({seenCount:0,lastSeen:null,knewCount:0,fuzzyCount:0,flashWrongCount:0,tag:DEFAULT_TAG,...w,id:w.id||Date.now()+Math.random()});
+        added++;
+      });
+      sv();updHdr();updateTagSelects();showAlert('backup-alert','ok','✓ 匯入 '+added+' 個單字');
     }catch{showAlert('backup-alert','err','檔案格式錯誤');}
     input.value='';
   };reader.readAsText(file);
@@ -451,7 +554,7 @@ let FQ=[],fi=0,fFlipped=false,fBatchSeen=new Set();
 
 function saveFlashProgress(){
   localStorage.setItem('lexica_flash_progress',JSON.stringify({
-    date:TODAY(),fi:fi,fqIds:FQ.map(w=>w.id),seenIds:[...fBatchSeen]
+    date:TODAY(),fi,tag:flashTag,fqIds:FQ.map(w=>w.id),seenIds:[...fBatchSeen]
   }));
 }
 function loadFlashProgress(){
@@ -460,6 +563,7 @@ function loadFlashProgress(){
     if(!s)return false;
     const p=JSON.parse(s);
     if(p.date!==TODAY())return false;
+    if(p.tag!==flashTag)return false; // different tag → restart
     const rebuilt=p.fqIds.map(id=>db.find(w=>w.id===id)).filter(Boolean);
     if(!rebuilt.length)return false;
     FQ=rebuilt;fi=Math.min(p.fi,FQ.length);fBatchSeen=new Set(p.seenIds||[]);
@@ -468,54 +572,46 @@ function loadFlashProgress(){
 }
 
 function buildFlashBatch(forceExtra=false){
+  const pool=filteredDb(flashTag).filter(w=>w.status!=='graduated');
   const t=now();
-  const forced=db.filter(w=>w.status!=='graduated'&&(w.flashWrongCount||0)>=3)
-    .sort((a,b)=>(b.flashWrongCount||0)-(a.flashWrongCount||0)).slice(0,3);
+  const forced=pool.filter(w=>(w.flashWrongCount||0)>=3).sort((a,b)=>(b.flashWrongCount||0)-(a.flashWrongCount||0)).slice(0,3);
   const forcedIds=new Set(forced.map(w=>w.id));
-  const due=db.filter(w=>w.status!=='graduated'&&w.nextReview<=t&&!forcedIds.has(w.id)).sort(()=>Math.random()-.5);
+  const due=pool.filter(w=>w.nextReview<=t&&!forcedIds.has(w.id)).sort(()=>Math.random()-.5);
   const wrong12=due.filter(w=>(w.flashWrongCount||0)>=1&&(w.flashWrongCount||0)<=2).slice(0,3);
   const wrong12Ids=new Set(wrong12.map(w=>w.id));
   const restDue=due.filter(w=>!wrong12Ids.has(w.id));
   let batch=[...forced,...wrong12,...restDue.slice(0,BATCH-forced.length-wrong12.length)];
   if(batch.length<BATCH&&forceExtra){
     const bIds=new Set(batch.map(w=>w.id));
-    const extras=db.filter(w=>w.status!=='graduated'&&!bIds.has(w.id)).sort(()=>Math.random()-.5).slice(0,BATCH-batch.length);
+    const extras=pool.filter(w=>!bIds.has(w.id)).sort(()=>Math.random()-.5).slice(0,BATCH-batch.length);
     batch=[...batch,...extras];
   }
   return batch.sort(()=>Math.random()-.5);
 }
 
 function initFlash(forceExtra=false,forceNew=false){
+  renderTagBar('flash-tag-bar',flashTag,t=>{flashTag=t;renderTagBar('flash-tag-bar',flashTag,arguments.callee);initFlash(false,true);});
   if(!forceExtra&&!forceNew&&loadFlashProgress()){
-    fFlipped=false;
-    renderFlashStats();renderFlashCard();
-    setTimeout(initWritePad,50);
-    return;
+    fFlipped=false;renderFlashCard();
+    setTimeout(initWritePad,50);return;
   }
   FQ=buildFlashBatch(forceExtra);
   fi=0;fFlipped=false;fBatchSeen=new Set();
   saveFlashProgress();
-  renderFlashStats();renderFlashCard();
+  renderFlashCard();
   setTimeout(initWritePad,50);
-}
-
-function renderFlashStats(){
-  const el=document.getElementById('fl-stats');
-  if(!el)return;
-  el.innerHTML=`
-    <div class="stat-box"><div class="stat-num">${db.length}</div><div class="stat-lbl">全部</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--rust)">${dueWords().length}</div><div class="stat-lbl">待複習</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--forest)">${db.filter(w=>w.status==='known').length}</div><div class="stat-lbl">已熟記</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--purple)">${db.filter(w=>w.status==='graduated').length}</div><div class="stat-lbl">已畢業</div></div>`;
 }
 
 function renderFlashCard(){
   const wrap=document.getElementById('fl-wrap');
-  if(!db.length){wrap.innerHTML=`<div class="empty-state"><span class="big">🃏</span><p>單字庫是空的</p><p style="margin-top:8px;font-size:.82rem">請先在「新增」加入單字</p></div>`;return;}
+  const pool=filteredDb(flashTag);
+  if(!pool.length){
+    wrap.innerHTML=`<div class="empty-state"><span class="big">🃏</span><p>「${flashTag}」沒有單字</p><p style="margin-top:8px;font-size:.82rem">請先在「新增」加入單字</p></div>`;return;
+  }
   if(fi>=FQ.length){
     const shownIds=new Set(FQ.map(w=>w.id));
-    const moreLeft=db.filter(w=>isDue(w)&&!shownIds.has(w.id)).length;
-    const nx=db.filter(w=>w.status!=='graduated'&&w.nextReview>now()).sort((a,b)=>a.nextReview-b.nextReview)[0];
+    const moreLeft=pool.filter(w=>isDue(w)&&!shownIds.has(w.id)).length;
+    const nx=pool.filter(w=>w.status!=='graduated'&&w.nextReview>now()).sort((a,b)=>a.nextReview-b.nextReview)[0];
     if(moreLeft>0){
       wrap.innerHTML=`<div class="done-card">
         <span class="big">本輪完成 ✓</span>
@@ -532,19 +628,15 @@ function renderFlashCard(){
         <button class="btn btn-out" style="margin-top:8px" onclick="goTab('quiz',document.querySelectorAll('.bnav-btn')[2])">切換到測驗模式 ✏️</button>
       </div>`;
     }
-    renderFlashStats();return;
+    return;
   }
-
   const wId=FQ[fi].id;
   const w=db.find(x=>x.id===wId)||FQ[fi];
   fFlipped=false;
-
   const seenCount=w.seenCount||0;
   const seenText=seenCount>0?`看過 ${seenCount} 次`:'第一次看';
   const wc=w.flashWrongCount||0;
-  const isDanger=wc>=3;
   const wrongBadge=wc>0?`<div class="fc-wrong-badge">✗ 不記得 ${wc} 次</div>`:'';
-
   wrap.innerHTML=`
     <div class="fc-prog">
       <div class="pbar"><div class="pfill" style="width:${Math.round(fi/FQ.length*100)}%"></div></div>
@@ -552,12 +644,12 @@ function renderFlashCard(){
     </div>
     <div class="fc-wrap" onclick="flipCard()">
       <div class="fc-inner" id="fc-inner">
-        <div class="fc-front${isDanger?' danger':''}">
+        <div class="fc-front${wc>=3?' danger':''}">
           <div class="fc-tag">${seenText}</div>
           ${wrongBadge}
           <div class="fc-en">${w.en}</div>
           ${w.phonetic?`<div class="fc-phonetic">${w.phonetic}</div>`:''}
-          <button class="speak-btn" style="margin:8px auto" onclick="event.stopPropagation();speak('${w.en}',this)">🔊</button>
+          <button class="speak-btn" style="margin:6px auto" onclick="event.stopPropagation();speak('${w.en}',this)">🔊</button>
           <div class="fc-hint"><span class="flip-hint">👆</span> 點卡片翻面看答案</div>
         </div>
         <div class="fc-back">
@@ -569,8 +661,8 @@ function renderFlashCard(){
           <div class="fc-back-zh">${w.zh||'—'}</div>
           ${w.phonetic?`<div class="fc-back-phonetic">${w.phonetic}</div>`:''}
           <div class="fc-back-sent">${w.sentence.replace('__',`<strong>${w.en}</strong>`)}</div>
-          ${w.sentenceZh?`<div style="font-size:.8rem;color:var(--sepia);margin:-4px 0 8px;font-style:italic;line-height:1.5">${w.sentenceZh}</div>`:''}
-          <button class="speak-btn" style="width:auto;border-radius:14px;padding:0 12px;gap:4px;font-size:.78rem;height:30px;margin-bottom:8px" onclick="speak('${w.sentence.replace('__',w.en).replace(/'/g,"\\'")}',this)">🔊 例句</button>
+          ${w.sentenceZh?`<div style="font-size:.78rem;color:var(--sepia);margin:-4px 0 8px;font-style:italic;line-height:1.5">${w.sentenceZh}</div>`:''}
+          <button class="speak-btn" style="width:auto;border-radius:14px;padding:0 12px;gap:4px;font-size:.78rem;height:28px;margin-bottom:6px" onclick="speak('${w.sentence.replace('__',w.en).replace(/'/g,"\\'")}',this)">🔊 例句</button>
         </div>
       </div>
     </div>
@@ -588,17 +680,14 @@ function renderFlashCard(){
         <button class="fc-act-btn btn-knew" onclick="fcAnswer(2)">✓ 記得</button>
       </div>
       <div class="interval-legend">
-        ✗ 不記得 → 明天再見<br>
-        △ 模糊（第1次）→ 明天・（第2次+）→ 3天後<br>
-        ✓ 第1次→7天・第2次→14天・第3次→28天・第4次→畢業🎓
+        ✗ 不記得 → 明天・△ 模糊第1次→明天，之後→3天・✓ 第1次→7天，第2次→14天，第3次→28天，第4次→畢業🎓
       </div>
     </div>`;
   setTimeout(()=>speak(w.en),400);
 }
 
 function flipCard(){
-  if(fFlipped)return;
-  fFlipped=true;
+  if(fFlipped)return;fFlipped=true;
   document.getElementById('fc-inner').classList.add('flipped');
   document.getElementById('fc-btns').style.display='block';
   const wId=FQ[fi].id;
@@ -611,36 +700,14 @@ function flipCard(){
 }
 
 function fcAnswer(score){
-  const wId=FQ[fi].id;
-  const rec=db.find(x=>x.id===wId);
+  const wId=FQ[fi].id;const rec=db.find(x=>x.id===wId);
   if(rec){
-    if(score===0){
-      rec.status='learning';rec.nextReview=now()+DAY;
-      rec.flashWrongCount=(rec.flashWrongCount||0)+1;
-    }else if(score===1){
-      const fz=rec.fuzzyCount||0;
-      rec.nextReview=now()+(fz===0?DAY:3*DAY);
-      rec.fuzzyCount=fz+1;rec.status='learning';
-      rec.flashWrongCount=0;rec.knewCount=0;
-    }else{
-      const kc=rec.knewCount||0;
-      if(kc>=3){rec.status='graduated';rec.nextReview=now()+365*DAY;}
-      else{rec.nextReview=now()+KNEW_INTERVALS[kc];rec.status='known';}
-      rec.knewCount=(rec.knewCount||0)+1;
-      rec.flashWrongCount=0;rec.fuzzyCount=0;
-    }
+    if(score===0){rec.status='learning';rec.nextReview=now()+DAY;rec.flashWrongCount=(rec.flashWrongCount||0)+1;}
+    else if(score===1){const fz=rec.fuzzyCount||0;rec.nextReview=now()+(fz===0?DAY:3*DAY);rec.fuzzyCount=fz+1;rec.status='learning';rec.flashWrongCount=0;rec.knewCount=0;}
+    else{const kc=rec.knewCount||0;if(kc>=3){rec.status='graduated';rec.nextReview=now()+365*DAY;}else{rec.nextReview=now()+KNEW_INTERVALS[kc];rec.status='known';}rec.knewCount=(rec.knewCount||0)+1;rec.flashWrongCount=0;rec.fuzzyCount=0;}
     sv();
   }
-  fi++;
-  saveFlashProgress();
-  renderFlashCard();renderFlashStats();updHdr();
-  setTimeout(initWritePad,50);
-}
-
-function fcSkip(){
-  fi++;
-  saveFlashProgress();
-  renderFlashCard();
+  fi++;saveFlashProgress();renderFlashCard();updHdr();
   setTimeout(initWritePad,50);
 }
 
@@ -652,42 +719,26 @@ function initWritePad(){
   const rect=canvas.getBoundingClientRect();
   if(rect.width===0){setTimeout(initWritePad,50);return;}
   const dpr=window.devicePixelRatio||1;
-  canvas.width=rect.width*dpr;
-  canvas.height=rect.height*dpr;
+  canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;
   writeCtx=canvas.getContext('2d');
   writeCtx.scale(dpr,dpr);
-  writeCtx.lineWidth=2.5;
-  writeCtx.lineCap='round';
-  writeCtx.lineJoin='round';
-  writeCtx.strokeStyle='#3a6b8a';
+  writeCtx.lineWidth=2.5;writeCtx.lineCap='round';writeCtx.lineJoin='round';writeCtx.strokeStyle='#3a6b8a';
   drawGuideLine(rect);
-  // always rebind — canvas element is recreated on every render
-  canvas.onpointerdown=startWrite;
-  canvas.onpointermove=moveWrite;
-  canvas.onpointerup=endWrite;
-  canvas.onpointerleave=endWrite;
+  canvas.onpointerdown=startWrite;canvas.onpointermove=moveWrite;
+  canvas.onpointerup=endWrite;canvas.onpointerleave=endWrite;
 }
 function drawGuideLine(rect){
   if(!writeCtx)return;
-  writeCtx.save();
-  writeCtx.strokeStyle='#d4c9b0';writeCtx.lineWidth=1;writeCtx.setLineDash([4,4]);
+  writeCtx.save();writeCtx.strokeStyle='#d4c9b0';writeCtx.lineWidth=1;writeCtx.setLineDash([4,4]);
   const y=rect.height*0.68;
   writeCtx.beginPath();writeCtx.moveTo(10,y);writeCtx.lineTo(rect.width-10,y);writeCtx.stroke();
   writeCtx.restore();
   writeCtx.strokeStyle='#3a6b8a';writeCtx.lineWidth=2.5;writeCtx.setLineDash([]);
 }
-function getPos(e,canvas){
-  const rect=canvas.getBoundingClientRect();
-  return{x:e.clientX-rect.left,y:e.clientY-rect.top};
-}
-function startWrite(e){
-  writing=true;
-  const pos=getPos(e,e.target);
-  lastX=pos.x;lastY=pos.y;
-}
+function getPos(e,canvas){const rect=canvas.getBoundingClientRect();return{x:e.clientX-rect.left,y:e.clientY-rect.top};}
+function startWrite(e){writing=true;const pos=getPos(e,e.target);lastX=pos.x;lastY=pos.y;}
 function moveWrite(e){
-  if(!writing||!writeCtx)return;
-  e.preventDefault();
+  if(!writing||!writeCtx)return;e.preventDefault();
   const pos=getPos(e,e.target);
   writeCtx.beginPath();writeCtx.moveTo(lastX,lastY);writeCtx.lineTo(pos.x,pos.y);writeCtx.stroke();
   lastX=pos.x;lastY=pos.y;
@@ -697,44 +748,35 @@ function clearWritePad(){
   const canvas=document.getElementById('write-canvas');
   if(!canvas||!writeCtx)return;
   const rect=canvas.getBoundingClientRect();
-  writeCtx.clearRect(0,0,canvas.width,canvas.height);
-  drawGuideLine(rect);
+  writeCtx.clearRect(0,0,canvas.width,canvas.height);drawGuideLine(rect);
 }
 
 /* ══ QUIZ ══ */
 let Q=[],qi=0,hLv=0,ansState='input';
-
 function initQuiz(){
-  Q=db.filter(w=>w.status==='known'&&w.seenCount>0&&w.nextReview<=now()).sort(()=>Math.random()-.5);
+  const pool=filteredDb(quizTag);
+  Q=pool.filter(w=>w.status==='known'&&w.seenCount>0&&w.nextReview<=now()).sort(()=>Math.random()-.5);
   qi=0;hLv=0;ansState='input';renderQuizStats();renderQuizCard();
 }
-
 function renderQuizStats(){
-  const known=db.filter(w=>w.status==='known'&&w.seenCount>0);
-  const dueCnt=known.filter(w=>w.nextReview<=now()).length;
+  const pool=filteredDb(quizTag);
+  const known=pool.filter(w=>w.status==='known'&&w.seenCount>0);
   document.getElementById('q-stats').innerHTML=`
-    <div class="stat-box"><div class="stat-num">${db.length}</div><div class="stat-lbl">全部單字</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--gold)">${db.filter(w=>w.status==='learning').length}</div><div class="stat-lbl">學習中</div></div>
+    <div class="stat-box"><div class="stat-num">${pool.length}</div><div class="stat-lbl">此分類單字</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--gold)">${pool.filter(w=>w.status==='learning').length}</div><div class="stat-lbl">學習中</div></div>
     <div class="stat-box"><div class="stat-num" style="color:var(--forest)">${known.length}</div><div class="stat-lbl">已熟記</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--rust)">${dueCnt}</div><div class="stat-lbl">今日待測</div></div>`;
+    <div class="stat-box"><div class="stat-num" style="color:var(--rust)">${known.filter(w=>w.nextReview<=now()).length}</div><div class="stat-lbl">今日待測</div></div>`;
 }
-
 function renderQuizCard(){
   const wrap=document.getElementById('q-wrap');
   if(!Q.length){
-    const nx=db.filter(w=>w.status==='known'&&w.nextReview>now()).sort((a,b)=>a.nextReview-b.nextReview)[0];
-    const hasLearning=db.filter(w=>w.status==='learning'&&w.seenCount>0).length;
+    const nx=filteredDb(quizTag).filter(w=>w.status==='known'&&w.nextReview>now()).sort((a,b)=>a.nextReview-b.nextReview)[0];
+    const hasLearning=filteredDb(quizTag).filter(w=>w.status==='learning'&&w.seenCount>0).length;
     wrap.innerHTML=`<div class="empty-state"><span class="big">✏️</span><p>目前沒有待測驗的單字</p>
-      ${hasLearning>0
-        ?'<p style="margin-top:8px;font-size:.82rem;color:var(--gold)">「學習中」的單字需在閃卡標記「✓ 清楚記得」後才能測驗</p>'
-        :nx?`<span class="next-t">下次測驗：${fmt(nx.nextReview)}</span>`
-        :'<p style="margin-top:8px;font-size:.82rem">請先在「閃卡」標記「✓ 清楚記得」</p>'}
+      ${hasLearning>0?'<p style="margin-top:8px;font-size:.82rem;color:var(--gold)">「學習中」的單字需在閃卡標記「✓ 記得」後才能測驗</p>':nx?`<span class="next-t">下次測驗：${fmt(nx.nextReview)}</span>`:'<p style="margin-top:8px;font-size:.82rem">請先在「閃卡」標記「✓ 記得」</p>'}
     </div>`;return;
   }
-  if(qi>=Q.length){
-    wrap.innerHTML=`<div class="done-card"><span class="big">測驗完成 ✓</span><p style="color:var(--sepia);font-size:.88rem">已測驗 ${Q.length} 個單字，辛苦了！</p><button class="btn btn-ink" style="margin-top:16px" onclick="initQuiz()">再測一輪</button></div>`;
-    renderQuizStats();return;
-  }
+  if(qi>=Q.length){wrap.innerHTML=`<div class="done-card"><span class="big">測驗完成 ✓</span><p style="color:var(--sepia);font-size:.88rem">已測驗 ${Q.length} 個單字，辛苦了！</p><button class="btn btn-ink" style="margin-top:16px" onclick="initQuiz()">再測一輪</button></div>`;renderQuizStats();return;}
   const w=Q[qi];hLv=0;ansState='input';
   const parts=(w.sentence+'').split('__');
   wrap.innerHTML=`
@@ -757,93 +799,71 @@ function renderQuizCard(){
       </div>
     </div>`;
   const inp=document.getElementById('blank');
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&ansState==='input')checkAns();});
-  inp.focus();
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&ansState==='input')checkAns();});inp.focus();
 }
-
 function checkAns(){
   if(ansState!=='input')return;
-  const inp=document.getElementById('blank');
-  const raw=inp.value;
+  const inp=document.getElementById('blank');const raw=inp.value;
   const norm=s=>s.toLowerCase().replace(/\s/g,'').replace(/[^\x20-\x7E]/g,'').trim();
-  const val=norm(raw);
   const w=Q[qi];
-  const ans=norm(w.en);
-
-  if(val===ans){
+  if(norm(raw)===norm(w.en)){
     ansState='correct';inp.classList.add('ok');inp.disabled=true;inp.value=w.en;
     setFb('ok','✓ 答對了！');
     const rec=db.find(x=>x.id===w.id);
-    if(rec){
-      const kc=rec.knewCount||0;
-      if(kc>=3){rec.status='graduated';rec.nextReview=now()+365*DAY;}
-      else{rec.nextReview=now()+KNEW_INTERVALS[kc];rec.status='known';}
-      rec.knewCount=(rec.knewCount||0)+1;rec.flashWrongCount=0;rec.fuzzyCount=0;sv();
-    }
+    if(rec){const kc=rec.knewCount||0;if(kc>=3){rec.status='graduated';rec.nextReview=now()+365*DAY;}else{rec.nextReview=now()+KNEW_INTERVALS[kc];rec.status='known';}rec.knewCount=(rec.knewCount||0)+1;rec.flashWrongCount=0;rec.fuzzyCount=0;sv();}
     const nextT=rec&&rec.status==='graduated'?'🎓 畢業！':fmt(now()+(KNEW_INTERVALS[Math.min((rec&&rec.knewCount||1)-1,2)]||WEEK));
-    document.getElementById('acts').innerHTML=`<button class="btn btn-green" onclick="qNxt()">下一個 →</button>
-      <p style="text-align:center;font-size:.75rem;color:var(--sepia);margin-top:4px">${rec&&rec.status==='graduated'?'🎓 這個字已畢業！':'下次複習：'+nextT}</p>`;
+    document.getElementById('acts').innerHTML=`<button class="btn btn-green" onclick="qNxt()">下一個 →</button><p style="text-align:center;font-size:.75rem;color:var(--sepia);margin-top:4px">${rec&&rec.status==='graduated'?'🎓 這個字已畢業！':'下次複習：'+nextT}</p>`;
   }else{
-    inp.classList.add('bad');setTimeout(()=>inp.classList.remove('bad'),350);
-    hLv++;
-    const rec=db.find(x=>x.id===w.id);
-    const a=w.en.split('');let h='';
+    inp.classList.add('bad');setTimeout(()=>inp.classList.remove('bad'),350);hLv++;
+    const rec=db.find(x=>x.id===w.id);const a=w.en.split('');let h='';
     if(hLv===1){
       h=a[0]+' '+'_ '.repeat(a.length-1).trim();
       setFb('bad',`✗ 你輸入：「${raw.trim()}」・提示：第一個字母是「${a[0]}」`);
       if(rec){rec.hintCount=(rec.hintCount||0)+1;sv();}
-      document.getElementById('hint-box').textContent=h;
-      document.getElementById('hint-box').style.display='block';
+      document.getElementById('hint-box').textContent=h;document.getElementById('hint-box').style.display='block';
       setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2500);
     }else if(hLv===2){
       h=a.map((c,i)=>(i===0||i===2)?c:'_').join(' ');
       setFb('bad',`✗ 你輸入：「${raw.trim()}」・再提示一點…`);
       if(rec){rec.hintCount=(rec.hintCount||0)+1;sv();}
-      document.getElementById('hint-box').textContent=h;
-      document.getElementById('hint-box').style.display='block';
+      document.getElementById('hint-box').textContent=h;document.getElementById('hint-box').style.display='block';
       setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2500);
     }else{
-      // 第3次錯：直接退回閃卡複習
       ansState='failed';inp.value=w.en;inp.disabled=true;
-      document.getElementById('hint-box').textContent=a.join(' ');
-      document.getElementById('hint-box').style.display='block';
+      document.getElementById('hint-box').textContent=a.join(' ');document.getElementById('hint-box').style.display='block';
       if(rec){rec.status='learning';rec.nextReview=now()+DAY;rec.wrongCount=(rec.wrongCount||0)+1;rec.knewCount=Math.max(0,(rec.knewCount||0)-1);sv();}
       setFb('bad','✗ 答案是「'+w.en+'」，退回閃卡複習，明天再來！');
       document.getElementById('acts').innerHTML=`<button class="btn btn-rust" onclick="qNxt()">下一個 →</button>`;
     }
   }
 }
-
 function qNxt(){qi++;renderQuizCard();renderQuizStats();}
-function setFb(type,msg){
-  const el=document.getElementById('fb-area');
-  if(!type){el.innerHTML='';return;}
-  el.innerHTML=`<div class="fb fb-${type==='ok'?'ok':'bad'}">${msg}</div>`;
-}
+function setFb(type,msg){const el=document.getElementById('fb-area');if(!type){el.innerHTML='';return;}el.innerHTML=`<div class="fb fb-${type==='ok'?'ok':'bad'}">${msg}</div>`;}
 
 /* ══ LIST ══ */
 let listFilter='all';
 function renderList(){
-  const unseen=db.filter(w=>!w.seenCount||w.seenCount===0).length;
-  const seen=db.filter(w=>w.seenCount>0&&w.status!=='graduated').length;
-  const known=db.filter(w=>w.status==='known').length;
-  const graduated=db.filter(w=>w.status==='graduated').length;
+  const pool=filteredDb(listTag);
+  const unseen=pool.filter(w=>!w.seenCount||w.seenCount===0).length;
+  const seen=pool.filter(w=>w.seenCount>0&&w.status!=='graduated').length;
+  const known=pool.filter(w=>w.status==='known').length;
+  const graduated=pool.filter(w=>w.status==='graduated').length;
   const boxStyle=a=>a?'cursor:pointer;border:2px solid var(--ink);transform:scale(1.03);transition:all .18s;box-shadow:0 2px 12px rgba(26,22,18,.15)':'cursor:pointer;border:1px solid var(--warm);transition:all .18s';
   document.getElementById('l-stats').innerHTML=`
-    <div class="stat-box" onclick="setFilter('all')" style="${boxStyle(listFilter==='all')}"><div class="stat-num">${db.length}</div><div class="stat-lbl">全部</div>${listFilter==='all'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼</div>':''}</div>
+    <div class="stat-box" onclick="setFilter('all')" style="${boxStyle(listFilter==='all')}"><div class="stat-num">${pool.length}</div><div class="stat-lbl">全部</div>${listFilter==='all'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼</div>':''}</div>
     <div class="stat-box" onclick="setFilter('unseen')" style="${boxStyle(listFilter==='unseen')}"><div class="stat-num" style="color:var(--rust)">${unseen}</div><div class="stat-lbl">未看過</div>${listFilter==='unseen'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼</div>':''}</div>
     <div class="stat-box" onclick="setFilter('seen')" style="${boxStyle(listFilter==='seen')}"><div class="stat-num" style="color:var(--sky)">${seen}</div><div class="stat-lbl">已看過</div>${listFilter==='seen'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼</div>':''}</div>
     <div class="stat-box" onclick="setFilter('known')" style="${boxStyle(listFilter==='known')}"><div class="stat-num" style="color:var(--forest)">${known}</div><div class="stat-lbl">已熟記</div>${listFilter==='known'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼</div>':''}</div>
     <div class="stat-box" onclick="setFilter('graduated')" style="${boxStyle(listFilter==='graduated')};grid-column:1/-1"><div class="stat-num" style="color:var(--purple)">${graduated}</div><div class="stat-lbl">🎓 已畢業</div>${listFilter==='graduated'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼ 顯示中</div>':''}</div>`;
   const body=document.getElementById('list-body');
-  if(!db.length){body.innerHTML=`<div class="empty-state"><span class="big">◌</span><p>尚未加入任何單字</p></div>`;return;}
-  const filterLabel={all:'全部單字',unseen:'未看過',seen:'已看過',known:'已熟記',graduated:'已畢業'};
+  if(!pool.length){body.innerHTML=`<div class="empty-state"><span class="big">◌</span><p>「${listTag}」沒有單字</p></div>`;return;}
+  const filterLabel={all:'全部',unseen:'未看過',seen:'已看過',known:'已熟記',graduated:'已畢業'};
   let filtered;
-  if(listFilter==='all')filtered=[...db];
-  else if(listFilter==='unseen')filtered=db.filter(w=>!w.seenCount||w.seenCount===0);
-  else if(listFilter==='seen')filtered=db.filter(w=>w.seenCount>0&&w.status!=='graduated');
-  else if(listFilter==='known')filtered=db.filter(w=>w.status==='known');
-  else filtered=db.filter(w=>w.status==='graduated');
+  if(listFilter==='all')filtered=[...pool];
+  else if(listFilter==='unseen')filtered=pool.filter(w=>!w.seenCount||w.seenCount===0);
+  else if(listFilter==='seen')filtered=pool.filter(w=>w.seenCount>0&&w.status!=='graduated');
+  else if(listFilter==='known')filtered=pool.filter(w=>w.status==='known');
+  else filtered=pool.filter(w=>w.status==='graduated');
   const ord={new:0,learning:1,known:2,graduated:3};filtered.sort((a,b)=>ord[a.status]-ord[b.status]);
   if(!filtered.length){body.innerHTML=`<div class="empty-state" style="padding:32px 20px"><span class="big" style="font-size:2.5rem">◌</span><p style="margin-top:8px">沒有「${filterLabel[listFilter]}」的單字</p></div>`;return;}
   const labelBar=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 2px">
@@ -861,6 +881,7 @@ function renderList(){
       ${w.sentenceZh?`<div style="font-size:.75rem;color:var(--sepia);margin-top:3px;line-height:1.5">${w.sentenceZh}</div>`:''}
       <div class="wi-bottom">
         <span class="badge b-${w.status}">${statusLabel[w.status]||w.status}</span>
+        <span class="tag-badge">${w.tag||DEFAULT_TAG}</span>
         <span class="seen-badge">${w.seenCount>0?'看過 '+w.seenCount+' 次':'未看過'}</span>
         ${kc>0?`<span class="seen-badge" style="color:var(--forest)">✓×${kc}</span>`:''}
         ${wc>0?`<span class="seen-badge" style="color:var(--rust)">✗×${wc}</span>`:''}
@@ -872,7 +893,7 @@ function renderList(){
 function setFilter(f){listFilter=f;renderList();const pg=document.getElementById('pg-list');if(pg)pg.scrollTop=0;}
 function del(id){if(!confirm('確定要刪除？'))return;db=db.filter(w=>w.id!==id);sv();renderList();updHdr();}
 
-updHdr();
+updHdr();updateTagSelects();
 </script>
 </body>
 </html>
