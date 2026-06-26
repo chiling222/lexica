@@ -247,6 +247,10 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
             <input type="text" id="import-tag-new" placeholder="新分類名稱" style="flex:1;display:none" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false"/>
           </div>
         </div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--sepia);margin-bottom:12px;cursor:pointer">
+          <input type="checkbox" id="import-overwrite-tag" style="width:auto;border:none;padding:0"/>
+          已存在的單字也更新 TAG
+        </label>
         <button class="btn btn-ink" onclick="pasteImport()">⬇ 匯入單字</button>
         <div class="alert" id="paste-alert" style="margin-top:10px"></div>
       </div>
@@ -460,6 +464,7 @@ function pasteImport(){
   const raw=document.getElementById('paste-area').value.trim();
   if(!raw){showAlert('paste-alert','err','請先貼上 JSON');return;}
   const tag=getImportTag();
+  const overwriteTag=document.getElementById('import-overwrite-tag')?.checked||false;
   let words;
   try{
     const clean=raw
@@ -478,6 +483,7 @@ function pasteImport(){
     const ex=db.find(x=>x.en===w.en.toLowerCase());
     if(ex){
       let ch=false;
+      if(overwriteTag&&ex.tag!==tag){ex.tag=tag;ch=true;}
       if(w.sentenceZh&&!ex.sentenceZh){ex.sentenceZh=w.sentenceZh;ch=true;}
       if(w.phonetic&&!ex.phonetic){ex.phonetic=w.phonetic;ch=true;}
       if(w.zh&&!ex.zh){ex.zh=w.zh;ch=true;}
@@ -868,7 +874,10 @@ function renderList(){
   if(!filtered.length){body.innerHTML=`<div class="empty-state" style="padding:32px 20px"><span class="big" style="font-size:2.5rem">◌</span><p style="margin-top:8px">沒有「${filterLabel[listFilter]}」的單字</p></div>`;return;}
   const labelBar=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:0 2px">
     <span style="font-family:'Syne Mono',monospace;font-size:.72rem;color:var(--sepia)">${filterLabel[listFilter]}・共 ${filtered.length} 個</span>
-    ${listFilter!=='all'?`<button onclick="setFilter('all')" style="font-size:.72rem;color:var(--sky);background:none;border:none;cursor:pointer;font-family:'Noto Sans TC',sans-serif">✕ 清除篩選</button>`:''}
+    <div style="display:flex;gap:6px;align-items:center">
+      ${listFilter!=='all'?`<button onclick="setFilter('all')" style="font-size:.72rem;color:var(--sky);background:none;border:none;cursor:pointer;font-family:'Noto Sans TC',sans-serif">✕ 清除篩選</button>`:''}
+      <button onclick="batchChangeTag()" style="font-size:.72rem;color:var(--sepia);background:none;border:1px solid var(--warm);border-radius:99px;padding:3px 10px;cursor:pointer;font-family:'Noto Sans TC',sans-serif">🏷 批次改TAG</button>
+    </div>
   </div>`;
   const statusLabel={new:'待學習',learning:'學習中',known:'已熟記',graduated:'🎓 已畢業'};
   body.innerHTML=labelBar+filtered.map(w=>{
@@ -891,6 +900,25 @@ function renderList(){
   }).join('');
 }
 function setFilter(f){listFilter=f;renderList();const pg=document.getElementById('pg-list');if(pg)pg.scrollTop=0;}
+function batchChangeTag(){
+  const pool=filteredDb(listTag);
+  const filterLabel={all:'全部',unseen:'未看過',seen:'已看過',known:'已熟記',graduated:'已畢業'};
+  let filtered;
+  if(listFilter==='all')filtered=[...pool];
+  else if(listFilter==='unseen')filtered=pool.filter(w=>!w.seenCount||w.seenCount===0);
+  else if(listFilter==='seen')filtered=pool.filter(w=>w.seenCount>0&&w.status!=='graduated');
+  else if(listFilter==='known')filtered=pool.filter(w=>w.status==='known');
+  else filtered=pool.filter(w=>w.status==='graduated');
+  if(!filtered.length){alert('沒有單字可以修改');return;}
+  const tags=allTags();
+  const tagOpts=tags.map(t=>`${t}`).join('、');
+  const newTag=prompt(`將目前顯示的 ${filtered.length} 個單字改到哪個 TAG？\n\n現有分類：${tagOpts}\n\n（輸入新名稱可新增分類）`);
+  if(!newTag||!newTag.trim())return;
+  const t=newTag.trim();
+  filtered.forEach(w=>{const rec=db.find(x=>x.id===w.id);if(rec)rec.tag=t;});
+  sv();updateTagSelects();renderList();
+  showAlert('backup-alert','ok',`✓ 已將 ${filtered.length} 個單字改為「${t}」`);
+}
 function del(id){if(!confirm('確定要刪除？'))return;db=db.filter(w=>w.id!==id);sv();renderList();updHdr();}
 
 updHdr();updateTagSelects();
