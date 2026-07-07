@@ -35,10 +35,12 @@ async function cloudLoad(){
       if(remote.length>0){
         const merged=[...remote];
         (window._db||[]).forEach(lw=>{if(!merged.find(r=>r.en===lw.en))merged.push(lw);});
+        merged.forEach(w=>{if(!w.tag)w.tag='日常';});
         window._db=merged;
         db.length=0;merged.forEach(w=>db.push(w));
         localStorage.setItem(window._STORE,JSON.stringify(merged));
         if(window._updHdr)window._updHdr();
+        if(window._updateTagSelects)window._updateTagSelects();
         showSyncMsg('☁ 雲端資料已同步（'+remote.length+' 個單字）');
       }
     }
@@ -107,12 +109,10 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .speak-btn:active{background:var(--sky);color:#fff}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 .speak-btn.speaking{background:var(--sky);color:#fff;animation:pulse .5s ease infinite}
-/* TAG PILLS */
 .tag-bar{display:flex;gap:6px;overflow-x:auto;padding:0 0 10px;margin-bottom:8px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .tag-bar::-webkit-scrollbar{display:none}
 .tag-pill{font-family:'Syne Mono',monospace;font-size:.7rem;padding:5px 14px;border-radius:99px;border:1.5px solid var(--warm);background:#fff;color:var(--sepia);cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;}
 .tag-pill.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-/* FLASHCARD */
 .fc-wrap{perspective:1200px;margin-bottom:16px}
 .fc-inner{position:relative;width:100%;min-height:260px;transform-style:preserve-3d;transition:transform .5s ease;cursor:pointer;}
 .fc-inner.flipped{transform:rotateY(180deg)}
@@ -133,7 +133,6 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .fc-seen{font-family:'Syne Mono',monospace;font-size:.68rem;color:var(--sepia);background:var(--cream);padding:3px 10px;border-radius:99px}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 .flip-hint{animation:bounce 1.2s ease infinite;display:inline-block}
-/* FC ACTIONS */
 .fc-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
 .fc-act-btn{display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border-radius:var(--r-sm);font-family:'Noto Sans TC',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:all .15s;border:1.5px solid transparent;white-space:nowrap}
 .btn-again{background:var(--red-bg);color:var(--rust);border-color:rgba(196,98,45,.25)}
@@ -146,14 +145,12 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .pbar{flex:1;height:3px;background:var(--cream);border-radius:99px;overflow:hidden}
 .pfill{height:100%;background:linear-gradient(90deg,var(--sky),var(--forest));border-radius:99px;transition:width .4s}
 .interval-legend{font-family:'Syne Mono',monospace;font-size:.65rem;color:var(--sepia);line-height:1.8;padding:8px 14px;background:var(--cream);border-radius:var(--r-sm)}
-/* HANDWRITING */
 .write-pad-wrap{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:10px 14px;margin-bottom:12px;box-shadow:0 1px 8px rgba(26,22,18,.07)}
 .write-pad-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .write-pad-label{font-family:'Syne Mono',monospace;font-size:.65rem;color:var(--sepia);letter-spacing:.1em;text-transform:uppercase}
 .write-pad-clear{font-family:'Noto Sans TC',sans-serif;font-size:.7rem;color:var(--sky);background:none;border:1px solid var(--warm);border-radius:99px;padding:3px 10px;cursor:pointer}
 .write-pad-clear:active{background:var(--cream)}
 .write-canvas{width:100%;height:100px;display:block;touch-action:none;border-radius:var(--r-sm);background:var(--paper);cursor:crosshair}
-/* QUIZ */
 .quiz-card{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:22px 18px;box-shadow:0 1px 8px rgba(26,22,18,.07);position:relative;overflow:hidden}
 .quiz-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--rust)}
 .rtag{font-family:'Syne Mono',monospace;font-size:.6rem;color:var(--sepia);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;padding-left:4px}
@@ -172,7 +169,6 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
 .fb-bad{background:var(--red-bg);color:var(--rust);border:1px solid rgba(196,98,45,.2)}
 .acts{display:flex;flex-direction:column;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--cream)}
 .acts-row{display:flex;gap:8px}.acts-row .btn{flex:1;margin:0}
-/* WORD LIST */
 .word-item{background:#fff;border:1px solid var(--warm);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(26,22,18,.06);}
 .wi-top{display:flex;align-items:center;gap:10px;margin-bottom:6px}
 .wi-en{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;flex:1}
@@ -296,6 +292,7 @@ textarea{resize:none;min-height:80px;font-family:'Cormorant Garamond',serif;font
     <div style="text-align:center;color:var(--sepia);font-size:.78rem;padding:4px 0">
       單字庫 <strong id="tot">0</strong> 個・今日待複習 <strong id="due-n" style="color:var(--rust)">0</strong> 個
     </div>
+    <div style="text-align:center;color:var(--warm);font-family:'Syne Mono',monospace;font-size:.62rem;padding:8px 0 0">Lexica v15 · 2026-07</div>
   </div>
   <!-- FLASH -->
   <div class="pg" id="pg-flash">
@@ -327,16 +324,17 @@ const DAY=24*60*60*1000,WEEK=7*DAY,BATCH=10;
 const KNEW_INTERVALS=[7*DAY,14*DAY,28*DAY];
 const DEFAULT_TAG='日常';
 
+/* ══ ESCAPE HELPERS (P0-2 fix) ══ */
+function esc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'");}
+function escH(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+/* ══ DATA ══ */
 let db=[];
 (function(){
   const oldKeys=['lexica_v9','lexica_v8','lexica_v7','lexica_v6','lexica_v5','lexica_v4','lexica_v3'];
   try{
     const s=localStorage.getItem(STORE);
-    if(s){db=JSON.parse(s)||[];
-      // migrate: words without tag → 日常
-      db.forEach(w=>{if(!w.tag)w.tag=DEFAULT_TAG;});
-      return;
-    }
+    if(s){db=JSON.parse(s)||[];db.forEach(w=>{if(!w.tag)w.tag=DEFAULT_TAG;});return;}
     for(const k of oldKeys){const o=localStorage.getItem(k);if(o){const p=JSON.parse(o);if(Array.isArray(p)&&p.length){db=p;db.forEach(w=>{if(!w.tag)w.tag=DEFAULT_TAG;});localStorage.setItem(STORE,JSON.stringify(db));localStorage.removeItem(k);return;}}}
   }catch(e){}
 })();
@@ -350,15 +348,12 @@ const TODAY=()=>new Date().toISOString().slice(0,10);
 const isDue=w=>w.status!=='graduated'&&w.nextReview<=now();
 const dueWords=()=>db.filter(isDue);
 
-// Get all unique tags
 function allTags(){
   const tags=new Set(db.map(w=>w.tag||DEFAULT_TAG));
   return[DEFAULT_TAG,...[...tags].filter(t=>t!==DEFAULT_TAG).sort()];
 }
 
-// Current selected tags per page
 let flashTag='全部',quizTag='全部',listTag='全部';
-
 function filteredDb(tag){
   if(tag==='全部')return db;
   return db.filter(w=>(w.tag||DEFAULT_TAG)===tag);
@@ -373,22 +368,30 @@ function updHdr(){
 }
 window._updHdr=updHdr;
 
+/* ══ TAG BAR (P0-1 fix: data attributes, no serialized callbacks) ══ */
+const tagBarHandlers={};
 function renderTagBar(barId,current,onSelect){
   const bar=document.getElementById(barId);
   if(!bar)return;
-  const tags=['全部',...allTags().filter(t=>t!=='全部'||true)];
-  // deduplicate
+  tagBarHandlers[barId]=onSelect;
   const uniq=['全部',...[...new Set(db.map(w=>w.tag||DEFAULT_TAG))].sort()];
-  bar.innerHTML=uniq.map(t=>`<button class="tag-pill${t===current?' on':''}" onclick="(${onSelect.toString()})('${t}')">${t}</button>`).join('');
+  bar.innerHTML=uniq.map(t=>`<button class="tag-pill${t===current?' on':''}" data-bar="${escH(barId)}" data-tag="${escH(t)}" onclick="onTagPill(this)">${escH(t)}</button>`).join('');
 }
+function onTagPill(el){
+  const fn=tagBarHandlers[el.dataset.bar];
+  if(fn)fn(el.dataset.tag);
+}
+function flashTagSelect(t){flashTag=t;renderTagBar('flash-tag-bar',flashTag,flashTagSelect);initFlash(false,true);}
+function quizTagSelect(t){quizTag=t;renderTagBar('quiz-tag-bar',quizTag,quizTagSelect);initQuiz();}
+function listTagSelect(t){listTag=t;renderTagBar('list-tag-bar',listTag,listTagSelect);renderList();}
 
 function goTab(t,btn){
   document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('on'));
   document.getElementById('pg-'+t).classList.add('on');btn.classList.add('on');
-  if(t==='flash'){renderTagBar('flash-tag-bar',flashTag,t=>{flashTag=t;initFlash(false,true);});initFlash();}
-  if(t==='quiz'){renderTagBar('quiz-tag-bar',quizTag,t=>{quizTag=t;renderTagBar('quiz-tag-bar',quizTag,arguments.callee);initQuiz();});initQuiz();}
-  if(t==='list'){renderTagBar('list-tag-bar',listTag,t=>{listTag=t;renderTagBar('list-tag-bar',listTag,arguments.callee);renderList();});renderList();}
+  if(t==='flash'){renderTagBar('flash-tag-bar',flashTag,flashTagSelect);initFlash();}
+  if(t==='quiz'){renderTagBar('quiz-tag-bar',quizTag,quizTagSelect);initQuiz();}
+  if(t==='list'){renderTagBar('list-tag-bar',listTag,listTagSelect);renderList();}
   updHdr();
 }
 
@@ -398,7 +401,7 @@ function loadVoices(){
   voices=window.speechSynthesis.getVoices();if(!voices.length)return;
   const sel=document.getElementById('voice-select');if(!sel)return;
   const en=voices.filter(v=>v.lang.startsWith('en'));
-  sel.innerHTML=en.map(v=>`<option value="${v.name}" ${v.name===savedVoiceName?'selected':''}>${v.name} (${v.lang})</option>`).join('');
+  sel.innerHTML=en.map(v=>`<option value="${escH(v.name)}" ${v.name===savedVoiceName?'selected':''}>${escH(v.name)} (${v.lang})</option>`).join('');
   if(!savedVoiceName&&en.length){
     const pref=['Samantha','Karen','Daniel','Alex','Moira'];
     const best=pref.map(n=>en.find(v=>v.name===n)).find(Boolean)||en[0];
@@ -426,16 +429,17 @@ function switchAddTab(tab){
   m.style.background=isClaude?'transparent':'var(--ink)';m.style.color=isClaude?'var(--sepia)':'var(--paper)';
 }
 
-/* TAG SELECT helpers */
+/* ══ TAG SELECT helpers ══ */
 function updateTagSelects(){
   const tags=allTags();
   ['import-tag-select','manual-tag-select'].forEach(id=>{
     const sel=document.getElementById(id);if(!sel)return;
     const cur=sel.value;
-    sel.innerHTML=tags.map(t=>`<option value="${t}">${t}</option>`).join('')+'<option value="__new__">＋ 新增分類…</option>';
+    sel.innerHTML=tags.map(t=>`<option value="${escH(t)}">${escH(t)}</option>`).join('')+'<option value="__new__">＋ 新增分類…</option>';
     if(tags.includes(cur))sel.value=cur;
   });
 }
+window._updateTagSelects=updateTagSelects;
 function onImportTagSelectChange(){
   const sel=document.getElementById('import-tag-select');
   const inp=document.getElementById('import-tag-new');
@@ -464,7 +468,7 @@ function pasteImport(){
   const raw=document.getElementById('paste-area').value.trim();
   if(!raw){showAlert('paste-alert','err','請先貼上 JSON');return;}
   const tag=getImportTag();
-  const overwriteTag=document.getElementById('import-overwrite-tag')?.checked||false;
+  const overwriteTag=document.getElementById('import-overwrite-tag')?document.getElementById('import-overwrite-tag').checked:false;
   let words;
   try{
     const clean=raw
@@ -544,7 +548,7 @@ function importBackup(input){
         added++;
       });
       sv();updHdr();updateTagSelects();showAlert('backup-alert','ok','✓ 匯入 '+added+' 個單字');
-    }catch{showAlert('backup-alert','err','檔案格式錯誤');}
+    }catch(e2){showAlert('backup-alert','err','檔案格式錯誤');}
     input.value='';
   };reader.readAsText(file);
 }
@@ -555,7 +559,7 @@ function showAlert(id,type,msg){
   el.textContent=msg;setTimeout(()=>el.classList.remove('show'),3000);
 }
 
-/* ══ FLASHCARD PROGRESS ══ */
+/* ══ FLASHCARD ══ */
 let FQ=[],fi=0,fFlipped=false,fBatchSeen=new Set();
 
 function saveFlashProgress(){
@@ -569,12 +573,12 @@ function loadFlashProgress(){
     if(!s)return false;
     const p=JSON.parse(s);
     if(p.date!==TODAY())return false;
-    if(p.tag!==flashTag)return false; // different tag → restart
+    if(p.tag!==flashTag)return false;
     const rebuilt=p.fqIds.map(id=>db.find(w=>w.id===id)).filter(Boolean);
     if(!rebuilt.length)return false;
     FQ=rebuilt;fi=Math.min(p.fi,FQ.length);fBatchSeen=new Set(p.seenIds||[]);
     return true;
-  }catch{return false;}
+  }catch(e){return false;}
 }
 
 function buildFlashBatch(forceExtra=false){
@@ -596,7 +600,7 @@ function buildFlashBatch(forceExtra=false){
 }
 
 function initFlash(forceExtra=false,forceNew=false){
-  renderTagBar('flash-tag-bar',flashTag,t=>{flashTag=t;renderTagBar('flash-tag-bar',flashTag,arguments.callee);initFlash(false,true);});
+  renderTagBar('flash-tag-bar',flashTag,flashTagSelect);
   if(!forceExtra&&!forceNew&&loadFlashProgress()){
     fFlipped=false;renderFlashCard();
     setTimeout(initWritePad,50);return;
@@ -612,7 +616,7 @@ function renderFlashCard(){
   const wrap=document.getElementById('fl-wrap');
   const pool=filteredDb(flashTag);
   if(!pool.length){
-    wrap.innerHTML=`<div class="empty-state"><span class="big">🃏</span><p>「${flashTag}」沒有單字</p><p style="margin-top:8px;font-size:.82rem">請先在「新增」加入單字</p></div>`;return;
+    wrap.innerHTML=`<div class="empty-state"><span class="big">🃏</span><p>「${escH(flashTag)}」沒有單字</p><p style="margin-top:8px;font-size:.82rem">請先在「新增」加入單字</p></div>`;return;
   }
   if(fi>=FQ.length){
     const shownIds=new Set(FQ.map(w=>w.id));
@@ -643,6 +647,8 @@ function renderFlashCard(){
   const seenText=seenCount>0?`看過 ${seenCount} 次`:'第一次看';
   const wc=w.flashWrongCount||0;
   const wrongBadge=wc>0?`<div class="fc-wrong-badge">✗ 不記得 ${wc} 次</div>`:'';
+  const enJs=esc(w.en);
+  const sentJs=esc(w.sentence.replace('__',w.en));
   wrap.innerHTML=`
     <div class="fc-prog">
       <div class="pbar"><div class="pfill" style="width:${Math.round(fi/FQ.length*100)}%"></div></div>
@@ -653,22 +659,22 @@ function renderFlashCard(){
         <div class="fc-front${wc>=3?' danger':''}">
           <div class="fc-tag">${seenText}</div>
           ${wrongBadge}
-          <div class="fc-en">${w.en}</div>
-          ${w.phonetic?`<div class="fc-phonetic">${w.phonetic}</div>`:''}
-          <button class="speak-btn" style="margin:6px auto" onclick="event.stopPropagation();speak('${w.en}',this)">🔊</button>
+          <div class="fc-en">${escH(w.en)}</div>
+          ${w.phonetic?`<div class="fc-phonetic">${escH(w.phonetic)}</div>`:''}
+          <button class="speak-btn" style="margin:6px auto" onclick="event.stopPropagation();speak('${enJs}',this)">🔊</button>
           <div class="fc-hint"><span class="flip-hint">👆</span> 點卡片翻面看答案</div>
         </div>
         <div class="fc-back">
           <div class="fc-meta">
             <span class="fc-seen">${seenText}</span>
             ${wc>0?`<span style="font-family:'Syne Mono',monospace;font-size:.65rem;background:var(--red-bg);color:var(--rust);padding:2px 8px;border-radius:99px">✗${wc}</span>`:''}
-            <button class="speak-btn" style="width:28px;height:28px;font-size:12px" onclick="speak('${w.en}',this)">🔊</button>
+            <button class="speak-btn" style="width:28px;height:28px;font-size:12px" onclick="speak('${enJs}',this)">🔊</button>
           </div>
-          <div class="fc-back-zh">${w.zh||'—'}</div>
-          ${w.phonetic?`<div class="fc-back-phonetic">${w.phonetic}</div>`:''}
-          <div class="fc-back-sent">${w.sentence.replace('__',`<strong>${w.en}</strong>`)}</div>
-          ${w.sentenceZh?`<div style="font-size:.78rem;color:var(--sepia);margin:-4px 0 8px;font-style:italic;line-height:1.5">${w.sentenceZh}</div>`:''}
-          <button class="speak-btn" style="width:auto;border-radius:14px;padding:0 12px;gap:4px;font-size:.78rem;height:28px;margin-bottom:6px" onclick="speak('${w.sentence.replace('__',w.en).replace(/'/g,"\\'")}',this)">🔊 例句</button>
+          <div class="fc-back-zh">${escH(w.zh||'—')}</div>
+          ${w.phonetic?`<div class="fc-back-phonetic">${escH(w.phonetic)}</div>`:''}
+          <div class="fc-back-sent">${escH(w.sentence).replace('__',`<strong>${escH(w.en)}</strong>`)}</div>
+          ${w.sentenceZh?`<div style="font-size:.78rem;color:var(--sepia);margin:-4px 0 8px;font-style:italic;line-height:1.5">${escH(w.sentenceZh)}</div>`:''}
+          <button class="speak-btn" style="width:auto;border-radius:14px;padding:0 12px;gap:4px;font-size:.78rem;height:28px;margin-bottom:6px" onclick="speak('${sentJs}',this)">🔊 例句</button>
         </div>
       </div>
     </div>
@@ -718,12 +724,16 @@ function fcAnswer(score){
 }
 
 /* ══ HANDWRITING PAD ══ */
-let writeCtx=null,writing=false,lastX=0,lastY=0;
+let writeCtx=null,writing=false,lastX=0,lastY=0,writePadRetry=0;
 function initWritePad(){
   const canvas=document.getElementById('write-canvas');
   if(!canvas)return;
   const rect=canvas.getBoundingClientRect();
-  if(rect.width===0){setTimeout(initWritePad,50);return;}
+  if(rect.width===0){
+    if(writePadRetry<10){writePadRetry++;setTimeout(initWritePad,50);}
+    return;
+  }
+  writePadRetry=0;
   const dpr=window.devicePixelRatio||1;
   canvas.width=rect.width*dpr;canvas.height=rect.height*dpr;
   writeCtx=canvas.getContext('2d');
@@ -757,12 +767,15 @@ function clearWritePad(){
   writeCtx.clearRect(0,0,canvas.width,canvas.height);drawGuideLine(rect);
 }
 
-/* ══ QUIZ ══ */
-let Q=[],qi=0,hLv=0,ansState='input';
+/* ══ QUIZ (P2-6 fix: track feedback timer) ══ */
+let Q=[],qi=0,hLv=0,ansState='input',fbTimer=null;
 function initQuiz(){
+  renderTagBar('quiz-tag-bar',quizTag,quizTagSelect);
   const pool=filteredDb(quizTag);
   Q=pool.filter(w=>w.status==='known'&&w.seenCount>0&&w.nextReview<=now()).sort(()=>Math.random()-.5);
-  qi=0;hLv=0;ansState='input';renderQuizStats();renderQuizCard();
+  qi=0;hLv=0;ansState='input';
+  if(fbTimer){clearTimeout(fbTimer);fbTimer=null;}
+  renderQuizStats();renderQuizCard();
 }
 function renderQuizStats(){
   const pool=filteredDb(quizTag);
@@ -775,6 +788,7 @@ function renderQuizStats(){
 }
 function renderQuizCard(){
   const wrap=document.getElementById('q-wrap');
+  if(fbTimer){clearTimeout(fbTimer);fbTimer=null;}
   if(!Q.length){
     const nx=filteredDb(quizTag).filter(w=>w.status==='known'&&w.nextReview>now()).sort((a,b)=>a.nextReview-b.nextReview)[0];
     const hasLearning=filteredDb(quizTag).filter(w=>w.status==='learning'&&w.seenCount>0).length;
@@ -785,18 +799,20 @@ function renderQuizCard(){
   if(qi>=Q.length){wrap.innerHTML=`<div class="done-card"><span class="big">測驗完成 ✓</span><p style="color:var(--sepia);font-size:.88rem">已測驗 ${Q.length} 個單字，辛苦了！</p><button class="btn btn-ink" style="margin-top:16px" onclick="initQuiz()">再測一輪</button></div>`;renderQuizStats();return;}
   const w=Q[qi];hLv=0;ansState='input';
   const parts=(w.sentence+'').split('__');
+  const enJs=esc(w.en);
+  const sentJs=esc(w.sentence.replace('__',w.en));
   wrap.innerHTML=`
     <div class="fc-prog"><div class="pbar"><div class="pfill" style="width:${Math.round(qi/Q.length*100)}%"></div></div><span>${qi+1}/${Q.length}</span></div>
     <div class="quiz-card">
       <div class="rtag">${{new:'新單字',learning:'複習中',known:'週期複習',graduated:'已畢業'}[w.status]||'複習'}</div>
       <div class="rc-meta">
-        ${w.phonetic?`<span class="rc-phonetic">${w.phonetic}</span>`:''}
-        <button class="speak-btn" onclick="speak('${w.en}',this)">🔊</button>
-        <button class="speak-btn" style="font-size:11px;width:auto;border-radius:14px;padding:0 10px;gap:3px;height:30px" onclick="speak('${w.sentence.replace('__',w.en).replace(/'/g,"\\'")}',this)">🔊 例句</button>
+        ${w.phonetic?`<span class="rc-phonetic">${escH(w.phonetic)}</span>`:''}
+        <button class="speak-btn" onclick="speak('${enJs}',this)">🔊</button>
+        <button class="speak-btn" style="font-size:11px;width:auto;border-radius:14px;padding:0 10px;gap:3px;height:30px" onclick="speak('${sentJs}',this)">🔊 例句</button>
       </div>
-      <div class="sent-area">${parts[0]||''}<input id="blank" class="blank-input" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="?"/>${parts[1]||''}</div>
-      ${w.zh?`<div class="meaning">中文：${w.zh}</div>`:''}
-      ${w.sentenceZh?`<div class="meaning" style="margin-top:-14px">例句：${w.sentenceZh}</div>`:''}
+      <div class="sent-area">${escH(parts[0]||'')}<input id="blank" class="blank-input" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" placeholder="?"/>${escH(parts[1]||'')}</div>
+      ${w.zh?`<div class="meaning">中文：${escH(w.zh)}</div>`:''}
+      ${w.sentenceZh?`<div class="meaning" style="margin-top:-14px">例句：${escH(w.sentenceZh)}</div>`:''}
       <div id="hint-box" style="display:none" class="hint-box"></div>
       <div id="fb-area"></div>
       <div class="acts" id="acts">
@@ -824,16 +840,18 @@ function checkAns(){
     const rec=db.find(x=>x.id===w.id);const a=w.en.split('');let h='';
     if(hLv===1){
       h=a[0]+' '+'_ '.repeat(a.length-1).trim();
-      setFb('bad',`✗ 你輸入：「${raw.trim()}」・提示：第一個字母是「${a[0]}」`);
+      setFb('bad',`✗ 你輸入：「${escH(raw.trim())}」・提示：第一個字母是「${a[0]}」`);
       if(rec){rec.hintCount=(rec.hintCount||0)+1;sv();}
       document.getElementById('hint-box').textContent=h;document.getElementById('hint-box').style.display='block';
-      setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2500);
+      if(fbTimer)clearTimeout(fbTimer);
+      fbTimer=setTimeout(()=>{fbTimer=null;const el=document.getElementById('blank');if(el&&!el.disabled){setFb(null);el.value='';el.focus();}},2500);
     }else if(hLv===2){
       h=a.map((c,i)=>(i===0||i===2)?c:'_').join(' ');
-      setFb('bad',`✗ 你輸入：「${raw.trim()}」・再提示一點…`);
+      setFb('bad',`✗ 你輸入：「${escH(raw.trim())}」・再提示一點…`);
       if(rec){rec.hintCount=(rec.hintCount||0)+1;sv();}
       document.getElementById('hint-box').textContent=h;document.getElementById('hint-box').style.display='block';
-      setTimeout(()=>{setFb(null);inp.value='';inp.focus();},2500);
+      if(fbTimer)clearTimeout(fbTimer);
+      fbTimer=setTimeout(()=>{fbTimer=null;const el=document.getElementById('blank');if(el&&!el.disabled){setFb(null);el.value='';el.focus();}},2500);
     }else{
       ansState='failed';inp.value=w.en;inp.disabled=true;
       document.getElementById('hint-box').textContent=a.join(' ');document.getElementById('hint-box').style.display='block';
@@ -843,12 +861,16 @@ function checkAns(){
     }
   }
 }
-function qNxt(){qi++;renderQuizCard();renderQuizStats();}
-function setFb(type,msg){const el=document.getElementById('fb-area');if(!type){el.innerHTML='';return;}el.innerHTML=`<div class="fb fb-${type==='ok'?'ok':'bad'}">${msg}</div>`;}
+function qNxt(){
+  if(fbTimer){clearTimeout(fbTimer);fbTimer=null;}
+  qi++;renderQuizCard();renderQuizStats();
+}
+function setFb(type,msg){const el=document.getElementById('fb-area');if(!el)return;if(!type){el.innerHTML='';return;}el.innerHTML=`<div class="fb fb-${type==='ok'?'ok':'bad'}">${msg}</div>`;}
 
 /* ══ LIST ══ */
 let listFilter='all';
 function renderList(){
+  renderTagBar('list-tag-bar',listTag,listTagSelect);
   const pool=filteredDb(listTag);
   const unseen=pool.filter(w=>!w.seenCount||w.seenCount===0).length;
   const seen=pool.filter(w=>w.seenCount>0&&w.status!=='graduated').length;
@@ -862,7 +884,7 @@ function renderList(){
     <div class="stat-box" onclick="setFilter('known')" style="${boxStyle(listFilter==='known')}"><div class="stat-num" style="color:var(--forest)">${known}</div><div class="stat-lbl">已熟記</div>${listFilter==='known'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼</div>':''}</div>
     <div class="stat-box" onclick="setFilter('graduated')" style="${boxStyle(listFilter==='graduated')};grid-column:1/-1"><div class="stat-num" style="color:var(--purple)">${graduated}</div><div class="stat-lbl">🎓 已畢業</div>${listFilter==='graduated'?'<div style="font-size:.6rem;color:var(--sepia);margin-top:3px">▼ 顯示中</div>':''}</div>`;
   const body=document.getElementById('list-body');
-  if(!pool.length){body.innerHTML=`<div class="empty-state"><span class="big">◌</span><p>「${listTag}」沒有單字</p></div>`;return;}
+  if(!pool.length){body.innerHTML=`<div class="empty-state"><span class="big">◌</span><p>「${escH(listTag)}」沒有單字</p></div>`;return;}
   const filterLabel={all:'全部',unseen:'未看過',seen:'已看過',known:'已熟記',graduated:'已畢業'};
   let filtered;
   if(listFilter==='all')filtered=[...pool];
@@ -882,19 +904,20 @@ function renderList(){
   const statusLabel={new:'待學習',learning:'學習中',known:'已熟記',graduated:'🎓 已畢業'};
   body.innerHTML=labelBar+filtered.map(w=>{
     const wc=w.flashWrongCount||0,kc=w.knewCount||0;
+    const enJs=esc(w.en);
     return `<div class="word-item">
-      <div class="wi-top"><span class="wi-en">${w.en}</span><button class="speak-btn" style="width:30px;height:30px;font-size:13px" onclick="speak('${w.en}',this)">🔊</button></div>
-      ${w.phonetic?`<div class="wi-phonetic">${w.phonetic}</div>`:''}
-      ${w.zh?`<div class="wi-zh">${w.zh}</div>`:''}
-      <div class="wi-sent">${w.sentence.replace('__',`<strong style="color:var(--rust);font-style:normal">[${w.en}]</strong>`)}</div>
-      ${w.sentenceZh?`<div style="font-size:.75rem;color:var(--sepia);margin-top:3px;line-height:1.5">${w.sentenceZh}</div>`:''}
+      <div class="wi-top"><span class="wi-en">${escH(w.en)}</span><button class="speak-btn" style="width:30px;height:30px;font-size:13px" onclick="speak('${enJs}',this)">🔊</button></div>
+      ${w.phonetic?`<div class="wi-phonetic">${escH(w.phonetic)}</div>`:''}
+      ${w.zh?`<div class="wi-zh">${escH(w.zh)}</div>`:''}
+      <div class="wi-sent">${escH(w.sentence).replace('__',`<strong style="color:var(--rust);font-style:normal">[${escH(w.en)}]</strong>`)}</div>
+      ${w.sentenceZh?`<div style="font-size:.75rem;color:var(--sepia);margin-top:3px;line-height:1.5">${escH(w.sentenceZh)}</div>`:''}
       <div class="wi-bottom">
         <span class="badge b-${w.status}">${statusLabel[w.status]||w.status}</span>
-        <span class="tag-badge">${w.tag||DEFAULT_TAG}</span>
+        <span class="tag-badge">${escH(w.tag||DEFAULT_TAG)}</span>
         <span class="seen-badge">${w.seenCount>0?'看過 '+w.seenCount+' 次':'未看過'}</span>
         ${kc>0?`<span class="seen-badge" style="color:var(--forest)">✓×${kc}</span>`:''}
         ${wc>0?`<span class="seen-badge" style="color:var(--rust)">✗×${wc}</span>`:''}
-        <button class="del-btn" onclick="del(${w.id})">刪除</button>
+        <button class="del-btn" data-id="${w.id}" onclick="del(this.dataset.id)">刪除</button>
       </div>
     </div>`;
   }).join('');
@@ -902,7 +925,6 @@ function renderList(){
 function setFilter(f){listFilter=f;renderList();const pg=document.getElementById('pg-list');if(pg)pg.scrollTop=0;}
 function batchChangeTag(){
   const pool=filteredDb(listTag);
-  const filterLabel={all:'全部',unseen:'未看過',seen:'已看過',known:'已熟記',graduated:'已畢業'};
   let filtered;
   if(listFilter==='all')filtered=[...pool];
   else if(listFilter==='unseen')filtered=pool.filter(w=>!w.seenCount||w.seenCount===0);
@@ -910,16 +932,20 @@ function batchChangeTag(){
   else if(listFilter==='known')filtered=pool.filter(w=>w.status==='known');
   else filtered=pool.filter(w=>w.status==='graduated');
   if(!filtered.length){alert('沒有單字可以修改');return;}
-  const tags=allTags();
-  const tagOpts=tags.map(t=>`${t}`).join('、');
-  const newTag=prompt(`將目前顯示的 ${filtered.length} 個單字改到哪個 TAG？\n\n現有分類：${tagOpts}\n\n（輸入新名稱可新增分類）`);
+  const newTag=prompt(`將目前顯示的 ${filtered.length} 個單字改到哪個 TAG？\n\n現有分類：${allTags().join('、')}\n\n（輸入新名稱可新增分類）`);
   if(!newTag||!newTag.trim())return;
   const t=newTag.trim();
   filtered.forEach(w=>{const rec=db.find(x=>x.id===w.id);if(rec)rec.tag=t;});
   sv();updateTagSelects();renderList();
   showAlert('backup-alert','ok',`✓ 已將 ${filtered.length} 個單字改為「${t}」`);
 }
-function del(id){if(!confirm('確定要刪除？'))return;db=db.filter(w=>w.id!==id);sv();renderList();updHdr();}
+function del(id){
+  const numId=parseFloat(id);
+  if(!confirm('確定要刪除？'))return;
+  db=db.filter(w=>w.id!==numId);
+  window._db=db;
+  sv();renderList();updHdr();
+}
 
 updHdr();updateTagSelects();
 </script>
